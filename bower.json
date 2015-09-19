@@ -1,0 +1,20 @@
+{
+  "name": "menchweb",
+  "version": "0.0.0",
+  "authors": [
+    "menchapp <menchapp@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0",
+    "paper-tabs": "PolymerElements/paper-tabs#~1.0.2",
+    "paper-card": "PolymerElements/paper-card#~1.0.4"
+  }
+}

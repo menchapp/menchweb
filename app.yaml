@@ -1,0 +1,19 @@
+application: mench-app
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /bower_components
+  static_dir: bower_components
+- url: /polymer
+  static_dir: polymer  
+- url: /icons
+  static_dir: icons  
+- url: .*
+  script: myproject.wsgi.application
+
+libraries:
+- name: django
+  version: 1.5

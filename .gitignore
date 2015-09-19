@@ -1,0 +1,5 @@
+# Bower components
+bower_components
+
+# Python compiled
+*.pyc

@@ -1,143 +1,82 @@
+<link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="projects.html">
+
 <dom-module id="mench-root">
  <template>
     <style is="custom-style">
-      :root {
-        --paper-toolbar-background: #2E2E58;
-      }
       :host {
         font-family: 'Raleway', sans-serif;
         margin: 0;
         color: #333;
+        height: 100%;
       }
-      paper-tabs, paper-toolbar {
-        background-color: #8AB8E6;
-        color: #fff;
-        box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+      paper-header-panel {
+        height: 100%;
+        --paper-header-panel-shadow: {
+            height: 6px;
+            bottom: -6px;
+            box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
+        };
+      }      
+      .paper-header {
+        background-color: white; /* #94DBFF #8AB8E6 ##7DEBEB */
+        color: #939393;
+        margin: 8px 30px 5px 30px;
       }
-      paper-toolbar paper-tabs {
-        box-shadow: none;
+      .paper-header div {
+        padding: 0px 10px;
       }
-      paper-tabs[noink][no-bar] paper-tab.iron-selected {
-        box-shadow: none;
+      .paper-header iron-icon {
+        margin-left: -5px;
+        margin-bottom: 3px;
       }
-      paper-tabs[align-bottom] {
-        box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.15);
+      .content {
+        height: 100%;
+        background: linear-gradient(#E7F7FF, white);
       }
+
+      .horizontal {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .flex-two {
+        @apply(--layout-flex-2);
+      }
+      .flex {
+        @apply(--layout-flex);
+      }
+      
       h3 {
         font-size: 16px;
         font-weight: 400;
         padding-top: 20px;
       }
-      #title-bg {
-        background-color: #8AB8E6; 
-      }
+
       #title-bar-logo {
         width: 150px;
       }
-
-      .page {
-      	padding: 20px;
-      }
-
-      #cards {
-        @apply(--layout-vertical);
-        @apply(--center-justified);
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      paper-card {
-        vertical-align: top;
-        width: 350px;
-        margin-bottom: 16px;
-        margin-right: 20px;
-      }
-      .avatar {
-        display: inline-block;
-        height: 64px;
-        width: 64px;
-        border-radius: 50%;
-        background: #8AB8E6;
-        color: white;
-        line-height: 64px;
-        font-size: 24px;
-        text-align: center;
-      }
-      .fancy .title {
-        position: absolute;
-        top: 30px;
-        left: 100px;
-        color: var(--paper-indigo-500);
-      }
-      .fancy img {
-        width: 100%;
-      }
-      .fancy .big {
-        font-size: 22px;
-        padding: 8px 0 16px;
-        color: var(--google-grey-500);
-      }
-      .fancy .medium {
-        font-size: 16px;
-        padding-bottom: 8px;
-      }
-      .pink {
-        --paper-card-header-color: var(--paper-pink-500);
-      }      
-  	  /*.paper-tabs-0 #selectionBar.paper-tabs {
-  	 	display:none;
-  	  }*/
     </style>	
 
-    <div id="title-bg">
-      <img id='title-bar-logo' src="/icons/logo_white.png"></img>
-    </div>    
-  	<paper-tabs selected="0">
-  	  <paper-tab id="myProjects" >YOUR PROJECTS</paper-tab>
-  	  <paper-tab id="allProjects" >BROWSE PROJECTS</paper-tab>
-  	</paper-tabs>
-
-  	<div class="page" hidden$="{{ !viewMine }}">
-  		<paper-card class='fancy'>
-        <div class="card-content">
-          <div class="avatar">$200</div>
-          <div class="title">
-            <div class="medium">Beach photos for Instagram</div>
-          </div>
+    <paper-header-panel class="flex">
+      <div class='paper-header horizontal'>
+        <div class='flex'>
+          <img id='title-bar-logo' src="/icons/logo_grey.png">
         </div>
-
-        <!-- take this out of the content class so that it can span the whole card -->
-        <img src="http://placehold.it/350x150">
-
-        <div class="card-content">
-          <div class="big">Summer is here!</div>
-          <div class="medium">We're looking for photos on the beach with a red color scheme.</div>
-          <div class="small">Contest closes on 10/17</div>
+        <div>Browse Projects</div>
+        <div>My Projects</div>
+        <div>Me
+          <iron-icon icon="arrow-drop-down"></iron-icon>
         </div>
-      </paper-card>
+      </div>
+      <div class="content fit">
+        <mench-projects></mench-projects>
+      </div>
+    </paper-header-panel>
 
-      <paper-card class='fancy'>
-        <div class="card-content">
-          <div class="avatar">$300</div>
-          <div class="title">
-            <div class="medium">Park photos with a fountain</div>
-          </div>
-        </div>
-
-        <!-- take this out of the content class so that it can span the whole card -->
-        <img src="http://placehold.it/350x150">
-
-        <div class="card-content">
-          <div class="big">Taken around sunset</div>
-          <div class="medium">No people should be visible in the shot.</div>
-          <div class="small">Contest closes on 11/01</div>
-        </div>
-      </paper-card>    
-  	</div>
-  	<div  class="page" hidden$="{{ viewMine }}">
-  		all projects
-  	</div>
-
+  	
   </template>
 
   <script>
@@ -160,8 +99,6 @@
         }
       },
       listeners: {
-        'allProjects.tap': 'showAllProjects',
-        'myProjects.tap': 'showMyProjects'
       },
 	  showMyProjects: function() {
 	  	this.viewMine = true;

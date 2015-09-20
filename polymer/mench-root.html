@@ -8,7 +8,7 @@
  <template>
     <style is="custom-style">
       :host {
-        font-family: 'Raleway', sans-serif;
+        font-family: 'Khula', sans-serif;
         margin: 0;
         color: #333;
         height: 100%;
@@ -33,6 +33,18 @@
         margin-left: -5px;
         margin-bottom: 3px;
       }
+      .paper-header a {
+        text-decoration: none;
+        color: #939393;
+      }
+      .paper-header a:hover {
+        color: #5CB8E6;
+      }
+      #title-bar-logo {
+        width: 150px;
+        vertical-align: middle;
+        margin-bottom: 4px;
+      }
       .content {
         height: 100%;
         background: linear-gradient(#E7F7FF, white);
@@ -48,16 +60,6 @@
       .flex {
         @apply(--layout-flex);
       }
-      
-      h3 {
-        font-size: 16px;
-        font-weight: 400;
-        padding-top: 20px;
-      }
-
-      #title-bar-logo {
-        width: 150px;
-      }
     </style>	
 
     <paper-header-panel class="flex">
@@ -65,10 +67,18 @@
         <div class='flex'>
           <img id='title-bar-logo' src="/icons/logo_grey.png">
         </div>
-        <div>Browse Projects</div>
-        <div>My Projects</div>
-        <div>Me
+        <div>
+          <a href="#">Browse Projects</a>
+        </div>
+        <div>
+          <a href="#">My Projects</a>
+        </div>
+        <div hidden$="{{!loggedIn}}">
+          <span>{{userName}}</span>
           <iron-icon icon="arrow-drop-down"></iron-icon>
+        </div>
+        <div hidden$="{{loggedIn}}">
+          <a href="{{loginUrl}}">Login</a>
         </div>
       </div>
       <div class="content fit">
@@ -83,7 +93,10 @@
     Polymer({
       is: "mench-root",
 	  ready: function() {
-	  	this.viewMine = true;
+      this.userName = userName;
+      this.loginUrl = loginUrl;
+      this.logoutUrl = logoutUrl;
+      this.loggedIn = loggedIn;
 	  },
       // add properties and methods on the element's prototype
 

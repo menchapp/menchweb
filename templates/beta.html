@@ -2,22 +2,21 @@
 <html>
 <head>
 	<title>mench</title>
-	<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js">
-    </script>	
+	<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>	
+	<script>
+		// Load variables passed from server.
+		var userName = "{{ user_name }}";
+		var loginUrl = "{{ login_url }}";
+		var logoutUrl = "{{ logout_url }}";
+		var loggedIn = "{{ logged_in }}" == "True";
+	</script>
+	<link rel="icon" type="image/png" href="icons/logo_square_grey.png" sizes="16x16">
 	<link rel="import" href="bower_components/polymer/polymer.html">
 	<link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
-
 	<link rel="import" href="bower_components/paper-card/paper-card.html">
 	<link rel="import" href="polymer/mench-root.html">
+	<link href='https://fonts.googleapis.com/css?family=Khula' rel='stylesheet' type='text/css'>
 	<link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
-    <style is="custom-style">
-	  #title-bar-logo {
-	  	width: 150px;
-	  }
-	  body{
-	  	margin: 0px;
-	  }
-    </style>	
 </head>
 <body class="fullbleed layout vertical">
 	<mench-root></mench-root>

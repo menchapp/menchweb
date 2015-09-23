@@ -32,6 +32,33 @@
       paper-input {
         max-width: 200px;
       }
+      input[type="file"] {
+        margin: 15px 0px;
+/*        padding: 10px;
+        background-color: lightgrey;*/
+      }
+      input[type="submit"] {
+        border: none;
+        background-color: lightsteelblue;
+        font-family: 'Khula';
+        color: white;
+        padding: 8px 12px 5px;
+        border-radius: 7%;
+        cursor: pointer;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+      #imgUpload {
+        margin: 20px;
+        padding: 20px;
+        color: #7B9595;
+        border: 1px solid #7B9595;
+      }
+      #imgUpload img {
+        max-width: 300px;
+        max-height: 200px;
+        
+      }
       #button-container {
         text-align: center;
       }
@@ -46,6 +73,15 @@
       <paper-card class='fancy'>
         <div id='cardContents'>
           <div class='horizontal'>
+            <div id="imgUpload" class="flex self-stretch">
+              Profile Picture<br>
+              <img src="{{profileUrl}}">
+              <form action="{{profileUploadUrl}}" method="POST" enctype="multipart/form-data">
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{csrfToken}}"/>
+              <input type="file" name="file"><br>
+              <input type="submit" name="submit" value="Upload">
+              </form>
+            </div>          
             <div>
               <paper-input label="Name *" value="{{name}}"></paper-input>
               <paper-input label="Email *" value="{{email}}"></paper-input>
@@ -53,17 +89,6 @@
               <paper-input label="Instagram" value="{{instagram}}"></paper-input>
               <paper-input label="Website" value="{{website}}"></paper-input>
             </div>
-            <div>
-              
-            </div>
-          </div>
-          <div class='horizontal'>
-            <paper-input label="City" value="{{city}}"></paper-input>
-            <paper-input label="State" value="{{state}}"></paper-input>
-          </div>
-          <div class='horizontal'>
-            <paper-input label="Zip" value="{{zip_code}}"></paper-input>
-            <paper-input label="Country" value="{{country}}"></paper-input>
           </div>
           <div><paper-textarea label="About you" rows="3" value="{{description}}"></paper-textarea></div>
           <div id='button-container'><paper-button id='submit'>Save</paper-button></div>
@@ -76,6 +101,9 @@
     Polymer({
       is: "mench-profile",
       ready: function() {
+        this.profileUploadUrl = profileUploadUrl;
+        this.csrfToken = Cookies.get('csrftoken');
+        this.profileUrl = profileUrl;
         console.log('ready');
       },
       properties: {

@@ -25,27 +25,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "myproject.settings")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
-from google.appengine.ext import webapp
-from google.appengine.ext import blobstore
-from google.appengine.ext import ndb
-from google.appengine.api import images
-from google.appengine.ext.webapp import blobstore_handlers
 
-class ServeVideoHandler(blobstore_handlers.BlobstoreDownloadHandler):
-  def get(self, photo_key):
-    if not blobstore.get(photo_key):
-      self.error(404)
-    else:
-      img = images.get_serving_url(photo_key) + "=s100"
-      # img.resize(width=80, height=100)
-      # img.im_feeling_lucky()
-      # thumbnail = img.execute_transforms(output_encoding=images.JPEG)
-
-      # self.response.headers['Content-Type'] = 'image/jpeg'
-      self.response.out.write(img)
-      #self.send_blob(photo_key)
-    
-downloader_handler = webapp.WSGIApplication([('/view/([A-Za-z0-9\-\=_]+)', ServeVideoHandler),], debug=True)
 application = get_wsgi_application()
 
 # Apply WSGI middleware here.

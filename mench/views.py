@@ -2,7 +2,7 @@ import cgi
 from google.appengine.api import users
 from django import http
 from django.shortcuts import render_to_response
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect 
 from django.template import Context, loader 
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -87,11 +87,22 @@ def my_projects(request):
 def my_profile(request):
   user = users.get_current_user()
   if user:
+    profile_query = UserPhoto.query(UserPhoto.user == users.get_current_user().user_id())
+    if profile_query.count() > 0:
+      profile = profile_query.fetch()
+      profile_url = images.get_serving_url(profile[0].to_dict()['blob_key'])
+    elif request.GET.__contains__("key"):  
+      profile_url = images.get_serving_url(request.GET.__getitem__("key"))
+    else:
+      profile_url = "" 
+     
     context = Context({
       'user_name': user.nickname(),
       'login_url': "",
       'logout_url': users.create_logout_url('beta'),
-      'logged_in': True
+      'logged_in': True,
+      'profile_url': profile_url,
+      'profile_upload_url' : blobstore.create_upload_url('/upload-photo.html')
     }, autoescape=False)
   else:
     context = Context({
@@ -159,5 +170,5 @@ def photo_upload_handler(request):
   user_photo = UserPhoto(user=users.get_current_user().user_id(),
                          blob_key=image_key)
   user_photo.put()
-  return HttpResponse('Success upload!')
+  return HttpResponseRedirect('/my-profile.html?key='+str(image_key))
 

@@ -1,8 +1,15 @@
+<script src="../bower_components/js-cookie/src/js.cookie.js"></script>
 <link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="projects.html">
+<link rel="import" href="rfp.html">
 
 <dom-module id="mench-root">
  <template>
@@ -33,11 +40,11 @@
         margin-left: -5px;
         margin-bottom: 3px;
       }
-      .paper-header a {
+      a {
         text-decoration: none;
         color: #939393;
       }
-      .paper-header a:hover {
+      a:hover {
         color: #5CB8E6;
       }
       #title-bar-logo {
@@ -45,10 +52,27 @@
         vertical-align: middle;
         margin-bottom: 4px;
       }
+      paper-dialog {
+        box-shadow: 1px 8px 15px 3px rgba(0, 0, 0, 0.14);
+      }
+      paper-dialog.size-position {
+        position: fixed;
+        top: 55px;
+        right: 0px;
+      }
+      paper-dialog.size-position {
+        width: 170px;
+      }      
       .content {
         height: 100%;
         background: linear-gradient(#E7F7FF, white);
       }
+      #userActions {
+        cursor: pointer;
+      }
+      #userActions:hover {
+        color: #5CB8E6;
+      }      
 
       .horizontal {
         @apply(--layout-horizontal);
@@ -68,12 +92,12 @@
           <img id='title-bar-logo' src="/icons/logo_grey.png">
         </div>
         <div>
-          <a href="#">Browse Projects</a>
+          <a href="/browse-projects.html">Browse Projects</a>
         </div>
         <div>
-          <a href="#">My Projects</a>
+          <a href="/my-projects.html">My Projects</a>
         </div>
-        <div hidden$="{{!loggedIn}}">
+        <div id="userActions" hidden$="{{!loggedIn}}">
           <span>{{userName}}</span>
           <iron-icon icon="arrow-drop-down"></iron-icon>
         </div>
@@ -82,8 +106,12 @@
         </div>
       </div>
       <div class="content fit">
-        <mench-projects></mench-projects>
+        <content></content>
       </div>
+      <paper-dialog id="position" class="size-position">
+        <div><a href="/my-profile.html">My Profile</a></div>
+        <div><a href="{{logoutUrl}}">Logout</a></div>
+      </paper-dialog>
     </paper-header-panel>
 
   	
@@ -92,14 +120,15 @@
   <script>
     Polymer({
       is: "mench-root",
-	  ready: function() {
-      this.userName = userName;
-      this.loginUrl = loginUrl;
-      this.logoutUrl = logoutUrl;
-      this.loggedIn = loggedIn;
-	  },
-      // add properties and methods on the element's prototype
-
+  	  ready: function() {
+        this.userName = userName;
+        this.loginUrl = loginUrl;
+        this.logoutUrl = logoutUrl;
+        this.loggedIn = loggedIn;
+  	  },
+      toggleUserActions: function() {
+        this.$.position.toggle();
+      },
       properties: {
         // declare properties for the element's public API
         greeting: {
@@ -112,13 +141,8 @@
         }
       },
       listeners: {
-      },
-	  showMyProjects: function() {
-	  	this.viewMine = true;
-	  },
-	  showAllProjects: function() {
-	  	this.viewMine = false;
-	  },	 
+        'userActions.tap' : 'toggleUserActions'
+      }, 
     });
   </script>
 

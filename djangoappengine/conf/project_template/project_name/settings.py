@@ -1,7 +1,9 @@
-# Django settings for myproject project.
+# Django settings for {{ project_name }} project.
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+# Initialize App Engine and import the default settings (DB backend, etc.).
+# If you want to use a different backend you have to remove all occurences
+# of "djangoappengine" from this file.
+from djangoappengine.settings_base import *
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -9,17 +11,10 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '',                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
-    }
-}
+# Activate django-dbindexer for the default database
+DATABASES['default'] = {'ENGINE': 'dbindexer', 'TARGET': DATABASES['default']}
+
+AUTOLOAD_SITECONF = 'indexes'
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -46,7 +41,7 @@ USE_I18N = True
 USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = True
+USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
@@ -69,8 +64,6 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    '/icons',
-    '/polymer'
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -85,7 +78,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'c94coq2ly9*y*j@-l!a)eeubf)17i0yy)=lrkm-h#da@!v96ot'
+SECRET_KEY = '{{ secret_key }}'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -95,6 +88,9 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    # This loads the index definitions, so it has to come first
+    'autoload.middleware.AutoloadMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -104,24 +100,31 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-FILE_UPLOAD_HANDLERS = (
-    'mench.views.BlobstoreFileUploadHandler',
-)
-
-ROOT_URLCONF = 'myproject.urls'
-
-# Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'myproject.wsgi.application'
+ROOT_URLCONF = '{{ project_name }}.urls'
 
 TEMPLATE_DIRS = (
-    'templates'
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 )
 
 INSTALLED_APPS = (
-    'mench',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    # Uncomment the next line to enable the admin:
+    # 'django.contrib.admin',
+    # Uncomment the next line to enable admin documentation:
+    # 'django.contrib.admindocs',
+    'djangotoolbox',
+    'autoload',
+    'dbindexer',
+
+    # djangoappengine should come last, so it can override a few manage.py commands
+    'djangoappengine',
 )
 
 # A sample logging configuration. The only tangible logging

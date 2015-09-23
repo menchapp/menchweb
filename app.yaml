@@ -11,6 +11,8 @@ handlers:
   static_dir: polymer  
 - url: /icons
   static_dir: icons  
+- url: /view/(.+)
+  script: myproject.wsgi.downloader_handler
 - url: .*
   script: myproject.wsgi.application
 

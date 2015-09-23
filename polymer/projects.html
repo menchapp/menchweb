@@ -13,6 +13,7 @@
       }       
       .page {
         height: 100%;
+        text-align: center;
       }
 
       #cards {
@@ -22,41 +23,6 @@
         margin-left: auto;
         margin-right: auto;
       }
-      paper-card {
-        vertical-align: top;
-        width: 350px;
-        margin: 20px;
-      }
-      .avatar {
-        font-family: 'Raleway', sans-serif;
-        display: inline-block;
-        height: 64px;
-        width: 64px;
-        border-radius: 50%;
-        background:  #94DBFF;
-        color: white;
-        line-height: 64px;
-        font-size: 24px;
-        text-align: center;
-      }
-      .fancy .title {
-        position: absolute;
-        top: 30px;
-        left: 100px;
-        color: var(--paper-indigo-500);
-      }
-      .fancy img {
-        width: 100%;
-      }
-      .fancy .big {
-        font-size: 22px;
-        padding: 8px 0 16px;
-        color: var(--google-grey-500);
-      }
-      .fancy .medium {
-        font-size: 16px;
-        padding-bottom: 8px;
-      }
       .pink {
         --paper-card-header-color: var(--paper-pink-500);
       }   
@@ -64,41 +30,9 @@
 
 
     <div class="page">
-      <paper-card class='fancy'>
-        <div class="card-content">
-          <div class="avatar">$200</div>
-          <div class="title">
-            <div class="medium">Beach photos for Instagram</div>
-          </div>
-        </div>
-
-        <!-- take this out of the content class so that it can span the whole card -->
-        <img src="http://placehold.it/350x150">
-
-        <div class="card-content">
-          <div class="big">Summer is here!</div>
-          <div class="medium">We're looking for photos on the beach with a red color scheme.</div>
-          <div class="small">Contest closes on 10/17</div>
-        </div>
-      </paper-card>
-
-      <paper-card class='fancy'>
-        <div class="card-content">
-          <div class="avatar">$300</div>
-          <div class="title">
-            <div class="medium">Park photos with a fountain</div>
-          </div>
-        </div>
-
-        <!-- take this out of the content class so that it can span the whole card -->
-        <img src="http://placehold.it/350x150">
-
-        <div class="card-content">
-          <div class="big">Taken around sunset</div>
-          <div class="medium">No people should be visible in the shot.</div>
-          <div class="small">Contest closes on 11/01</div>
-        </div>
-      </paper-card>    
+      <template is="dom-repeat" items="{{rfps}}">
+          <mench-rfp data="{{item}}"></inn-listing>
+      </template>    
     </div>
 
 
@@ -109,6 +43,90 @@
       is: "mench-projects",
   	  ready: function() {
   	  	console.log('ready');
+        this.rfps = [];
+        this.push('rfps', {
+          userId: 'menchapp@gmail.com',
+          title: "Kinetic park photos",
+          subtitle: "Something that feels energetic!",
+          prize: 300,
+          endDate: "2015-11-01",
+          details: "Colorful, fun, playful",
+          terms: "Royalty Free",
+          intendedUse: "Digital Media",
+          duration: "No restrictions",
+          territory: "Worldwide",
+          exclusivity: "No restrictions",
+          hashtag: "",
+          submissions: [],
+          img: "/icons/carousel.jpg"
+        }); 
+        this.push('rfps', {
+          userId: 'menchapp@gmail.com',
+          title: "Beach photos for Instagram",
+          subtitle: "Summer is here!",
+          prize: 200,
+          endDate: "2015-10-17",
+          details: "We're looking for photos on the beach with a bright color scheme.",
+          terms: "Royalty Free",
+          intendedUse: "Digital Media",
+          duration: "No restrictions",
+          territory: "Worldwide",
+          exclusivity: "No restrictions",
+          hashtag: "",
+          submissions: [],
+          img: "/icons/beach.jpg"
+        });  
+        this.push('rfps', {
+          userId: 'menchapp@gmail.com',
+          title: "Fun fruits",
+          subtitle: "",
+          prize: 150,
+          endDate: "2016-01-30",
+          details: "For our multicultural cookbook.",
+          terms: "Royalty Free",
+          intendedUse: "Digital Media",
+          duration: "No restrictions",
+          territory: "Worldwide",
+          exclusivity: "No restrictions",
+          hashtag: "",
+          submissions: [],
+          img: "/icons/starfruit.jpg"
+        });  
+        this.push('rfps', {
+          userId: 'menchapp@gmail.com',
+          title: "Old farmhouse in field",
+          subtitle: "",
+          prize: 150,
+          endDate: "2015-12-12",
+          details: "Should look abandoned. During the day, flexible color scheme.",
+          terms: "Royalty Free",
+          intendedUse: "Digital Media",
+          duration: "No restrictions",
+          territory: "Worldwide",
+          exclusivity: "No restrictions",
+          hashtag: "",
+          submissions: [],
+          img: "/icons/farmhouse.jpg"
+        });  
+        this.push('rfps', {
+          userId: 'menchapp@gmail.com',
+          title: "Latte art in maroon mug",
+          subtitle: "",
+          prize: 35,
+          endDate: "2015-12-01",
+          details: "Needed to fit the color scheme of our coffee shop",
+          terms: "Royalty Free",
+          intendedUse: "Digital Media",
+          duration: "No restrictions",
+          territory: "Worldwide",
+          exclusivity: "No restrictions",
+          hashtag: "",
+          submissions: [],
+          img: "/icons/latte.jpg"
+        });  
+
+
+
   	  },
       properties: {
         // declare properties for the element's public API

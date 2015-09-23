@@ -1,0 +1,109 @@
+<dom-module id="mench-rfp">
+ <template>
+    <style is="custom-style">
+      .flex {
+        @apply(--layout-flex);
+      }
+      .horizontal {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }       
+      paper-card {
+        vertical-align: top;
+        width: 350px;
+        margin: 20px;
+        text-align: left;
+      }
+      .avatar {
+        font-family: 'Raleway', sans-serif;
+        display: inline-block;
+        height: 64px;
+        width: 64px;
+        border-radius: 50%;
+        background:  #94DBFF;
+        color: white;
+        line-height: 64px;
+        font-size: 24px;
+        text-align: center;
+      }
+      .fancy .title {
+        margin-left: 20px;
+        font-size: 20px;
+        color: #767693;
+        font-family: 'Raleway';
+      }
+      .fancy img {
+        width: 100%;
+      }
+      .fancy .big {
+        font-size: 22px;
+        padding-bottom: 0px;
+        color: var(--google-grey-500);
+      }
+      .fancy .medium {
+        font-size: 16px;
+        padding-bottom: 8px;
+        line-height: 18px;
+      }
+      .pink {
+        --paper-card-header-color: var(--paper-pink-500);
+      }   
+    </style>  
+
+    <paper-card class='fancy'>
+      <div class="card-content horizontal">
+        <div class="avatar">
+          $<span>{{data.prize}}</span>
+        </div>
+        <div class="title">
+          <div>{{data.title}}</div>
+        </div>
+      </div>
+
+      <!-- take this out of the content class so that it can span the whole card -->
+      <img src="{{data.img}}">
+
+      <div class="card-content">
+        <div class="big">{{data.subtitle}}</div>
+        <div class="medium">{{data.details}}</div>
+        <div class="small"><i>Contest closes on <span>{{data.endDate}}</span></i></div>
+      </div>
+    </paper-card>    
+
+  </template>
+
+  <script>
+    Polymer({
+      is: "mench-rfp",
+      ready: function() {
+        console.log('ready');
+      },
+      properties: {
+        data: {
+          type: Object,
+          notify: true,
+          value: function() { return {
+              userId: 'menchapp@gmail.com',
+              title: "Photo wanted",
+              subtitle: "For digital media",
+              prize: 50,
+              endDate: "2015-10-31",
+              details: "",
+              terms: "Royalty Free",
+              intendedUse: "Digital Media",
+              duration: "No restrictions",
+              territory: "Worldwide",
+              exclusivity: "No restrictions",
+              hashtag: "",
+              submissions: [],
+              img: "http://placehold.it/350x150"
+            }; 
+          } // end value function
+        }
+      },
+      listeners: {
+      }
+    });
+  </script>
+
+</dom-module>

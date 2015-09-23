@@ -1,0 +1,88 @@
+<dom-module id="mench-profile">
+ <template>
+    <style is="custom-style">
+      .page {
+        height: 100%;
+        text-align: center;
+      }
+
+      .flex {
+        @apply(--layout-flex);
+      }
+      .horizontal {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }       
+      paper-card {
+        vertical-align: top;
+        width: 80%;
+        max-width: 600px;
+        margin: 20px;
+        text-align: left;
+        font-family: 'Khula', sans-serif;
+      }
+      #cardContents {
+        padding: 20px;
+      }      
+      paper-input, paper-textarea {
+        --paper-input-container-color: #7B9595;
+        --paper-input-container-focus-color: #94DBFF;
+        margin: 0px 10px;
+      }
+      paper-input {
+        max-width: 200px;
+      }
+      #button-container {
+        text-align: center;
+      }
+      paper-button {
+        color: #7B9595;
+        margin: 10px 10px 0 10px;
+        font-size: 14px;
+      }  
+    </style>  
+
+    <div class='page'>
+      <paper-card class='fancy'>
+        <div id='cardContents'>
+          <div class='horizontal'>
+            <div>
+              <paper-input label="Name *" value="{{name}}"></paper-input>
+              <paper-input label="Email *" value="{{email}}"></paper-input>
+              <paper-input label="Location" value="{{location}}"></paper-input>
+              <paper-input label="Instagram" value="{{instagram}}"></paper-input>
+              <paper-input label="Website" value="{{website}}"></paper-input>
+            </div>
+            <div>
+              
+            </div>
+          </div>
+          <div class='horizontal'>
+            <paper-input label="City" value="{{city}}"></paper-input>
+            <paper-input label="State" value="{{state}}"></paper-input>
+          </div>
+          <div class='horizontal'>
+            <paper-input label="Zip" value="{{zip_code}}"></paper-input>
+            <paper-input label="Country" value="{{country}}"></paper-input>
+          </div>
+          <div><paper-textarea label="About you" rows="3" value="{{description}}"></paper-textarea></div>
+          <div id='button-container'><paper-button id='submit'>Save</paper-button></div>
+        </paper-card>    
+      </div>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: "mench-profile",
+      ready: function() {
+        console.log('ready');
+      },
+      properties: {
+      },
+      listeners: {
+      }
+    });
+  </script>
+
+</dom-module>

@@ -1,3 +1,4 @@
+import json
 import cgi
 from google.appengine.api import users
 from django import http
@@ -43,6 +44,27 @@ def add_rfp(request):
   print request.body
   return HttpResponse("Success!")  
 
+def save_profile(request):
+  user = users.get_current_user()
+  if user == None:
+    return HttpResponse("User not logged in.")  
+  if request.method != 'POST':
+    return HttpResponse("Add RFP only accepts POSTs")  
+  print request.body
+  data = json.loads(request.body)
+
+  profile = Profile(brand="",
+                 user=user.user_id(),
+                 name=data['name'],
+                 email=data['email'],
+                 phone=data['phone'],
+                 instagram=data['instagram'],
+                 location=data['location'],
+                 about=data['description'])
+
+  profile.put()
+  return HttpResponse("Success!")  
+
 @ensure_csrf_cookie
 def browse_projects(request):
   user = users.get_current_user()
@@ -50,13 +72,13 @@ def browse_projects(request):
     context = Context({
       'user_name': user.nickname(),
       'login_url': "",
-      'logout_url': users.create_logout_url('beta'),
+      'logout_url': users.create_logout_url('/'),
       'logged_in': True
     }, autoescape=False)
   else:
     context = Context({
       'user_name': "",
-      'login_url': users.create_login_url('beta'),
+      'login_url': users.create_login_url('/'),
       'logout_url': "",
       'logged_in': False
     }, autoescape=False)
@@ -70,13 +92,13 @@ def my_projects(request):
     context = Context({
       'user_name': user.nickname(),
       'login_url': "",
-      'logout_url': users.create_logout_url('beta'),
+      'logout_url': users.create_logout_url('/'),
       'logged_in': True
     }, autoescape=False)
   else:
     context = Context({
       'user_name': "",
-      'login_url': users.create_login_url('beta'),
+      'login_url': users.create_login_url('/'),
       'logout_url': "",
       'logged_in': False
     }, autoescape=False)
@@ -87,7 +109,7 @@ def my_projects(request):
 def my_profile(request):
   user = users.get_current_user()
   if user:
-    profile_query = UserPhoto.query(UserPhoto.user == users.get_current_user().user_id())
+    profile_query = UserPhoto.query(UserPhoto.user == user.user_id())
     if profile_query.count() > 0:
       profile = profile_query.fetch()
       profile_url = images.get_serving_url(profile[0].to_dict()['blob_key'])
@@ -95,46 +117,33 @@ def my_profile(request):
       profile_url = images.get_serving_url(request.GET.__getitem__("key"))
     else:
       profile_url = "" 
-     
+
+    profile_query = Profile.query(Profile.user == user.user_id())
+    if profile_query.count() > 0:
+      profile = profile_query.fetch()
+      profile_info = json.dumps(profile[0].to_dict())
+    else:
+      profile_info = None
+
     context = Context({
       'user_name': user.nickname(),
       'login_url': "",
-      'logout_url': users.create_logout_url('beta'),
+      'logout_url': users.create_logout_url('/'),
       'logged_in': True,
       'profile_url': profile_url,
-      'profile_upload_url' : blobstore.create_upload_url('/upload-photo.html')
+      'profile_info': profile_info,
+      'profile_upload_url' : blobstore.create_upload_url('/upload-profile-photo.html')
     }, autoescape=False)
+    template = loader.get_template('my-profile.html')
   else:
     context = Context({
       'user_name': "",
-      'login_url': users.create_login_url('beta'),
+      'login_url': users.create_login_url('/'),
       'logout_url': "",
       'logged_in': False
     }, autoescape=False)
-  template = loader.get_template('my-profile.html')
+    template = loader.get_template('browse-projects.html')
   return HttpResponse(template.render(context))  
-
-
-def beta(request):
-  user = users.get_current_user()
-  if user:
-    context = Context({
-      'user_name': user.nickname(),
-      'login_url': "",
-      'logout_url': users.create_logout_url('beta'),
-      'logged_in': True
-    }, autoescape=False)
-  else:
-    context = Context({
-      'user_name': "",
-      'login_url': users.create_login_url('beta'),
-      'logout_url': "",
-      'logged_in': False
-    }, autoescape=False)
-
-  template = loader.get_template('my-projects.html')
-  return HttpResponse(template.render(context))  
-
 
 def test(request):
   upload_url = blobstore.create_upload_url('/upload-photo.html')
@@ -165,6 +174,14 @@ def test(request):
   return HttpResponse(template.render(context))
 
 def photo_upload_handler(request):
+  image = request.FILES['file']
+  image_key = image.blobstore_info.key()
+  user_photo = UserPhoto(user=users.get_current_user().user_id(),
+                         blob_key=image_key)
+  user_photo.put()
+  return HttpResponseRedirect('/my-profile.html?key='+str(image_key))
+
+def rfp_photo_upload_handler(request):
   image = request.FILES['file']
   image_key = image.blobstore_info.key()
   user_photo = UserPhoto(user=users.get_current_user().user_id(),

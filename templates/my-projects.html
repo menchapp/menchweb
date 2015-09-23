@@ -9,19 +9,22 @@
 		var loginUrl = "{{ login_url }}";
 		var logoutUrl = "{{ logout_url }}";
 		var loggedIn = "{{ logged_in }}" == "True";
+    var rfpUploadUrl = "#";//"{{ rfp_upload_url }}";
+    var rfpUrl = "";//"{{ rfp_url }}";  		
 	</script>
 	<link rel="icon" type="image/png" href="icons/logo_square_grey.png" sizes="16x16">
 	<link rel="import" href="bower_components/polymer/polymer.html">
 	<link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
 	<link rel="import" href="bower_components/paper-card/paper-card.html">
 	<link rel="import" href="polymer/mench-root.html">
+	<link rel="import" href="polymer/my-projects.html">	
 	<link href='https://fonts.googleapis.com/css?family=Nobile' rel='stylesheet' type='text/css'>
 	<link href='https://fonts.googleapis.com/css?family=Khula' rel='stylesheet' type='text/css'>
 	<link href='https://fonts.googleapis.com/css?family=Raleway:400,500,600' rel='stylesheet' type='text/css'>
 </head>
 <body unresolved class="fullbleed layout vertical">
 	<mench-root>
-		<mench-projects></mench-projects>
+		<mench-my-projects></mench-my-projects>
 	</mench-root>
 </body>
 </html>

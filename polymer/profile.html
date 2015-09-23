@@ -85,15 +85,16 @@
             <div>
               <paper-input label="Name *" value="{{name}}"></paper-input>
               <paper-input label="Email *" value="{{email}}"></paper-input>
+              <paper-input label="Phone" value="{{phone}}"></paper-input>
               <paper-input label="Location" value="{{location}}"></paper-input>
               <paper-input label="Instagram" value="{{instagram}}"></paper-input>
               <paper-input label="Website" value="{{website}}"></paper-input>
             </div>
           </div>
           <div><paper-textarea label="About you" rows="3" value="{{description}}"></paper-textarea></div>
-          <div id='button-container'><paper-button id='submit'>Save</paper-button></div>
-        </paper-card>    
-      </div>
+          <div id='button-container'><paper-button id='save'>Save</paper-button></div>
+        </div>
+      </paper-card>    
     </div>
   </template>
 
@@ -104,11 +105,36 @@
         this.profileUploadUrl = profileUploadUrl;
         this.csrfToken = Cookies.get('csrftoken');
         this.profileUrl = profileUrl;
+        this.description = "";
+        if (profileInfo) {
+          this.name = profileInfo.name;
+          this.email = profileInfo.email;
+          this.phone = profileInfo.phone;
+          this.location = profileInfo.location;
+          this.instagram = profileInfo.instagram;
+          this.website = profileInfo.website;
+          this.description = profileInfo.description || "";
+        }
         console.log('ready');
+      },
+      saveUserProfile: function() {
+        var x = new XMLHttpRequest();
+        x.open('POST', '/save-user-profile.html');
+        x.setRequestHeader("X-CSRFToken", this.csrfToken);
+        x.send(JSON.stringify({
+          name: this.name,
+          email: this.email,
+          phone: this.phone,
+          location: this.location,
+          instagram: this.instagram,
+          website: this.website,
+          description: this.description
+        }));
       },
       properties: {
       },
       listeners: {
+        'save.tap': 'saveUserProfile'
       }
     });
   </script>

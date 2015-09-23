@@ -8,3 +8,19 @@ class UserPhoto(ndb.Model):
   user = ndb.StringProperty()
   # blob_key = blobstore.BlobReferenceProperty()
   blob_key = ndb.BlobKeyProperty()
+
+# Create your models here.
+class RfpPhoto(ndb.Model):
+  user = ndb.StringProperty()
+  # blob_key = blobstore.BlobReferenceProperty()
+  blob_key = ndb.BlobKeyProperty()
+
+class Profile(ndb.Model):
+  user = ndb.StringProperty()
+  brand = ndb.StringProperty()
+  name = ndb.StringProperty()
+  email = ndb.StringProperty()
+  phone = ndb.StringProperty()
+  instagram = ndb.StringProperty()
+  location = ndb.StringProperty()
+  about = ndb.TextProperty()  

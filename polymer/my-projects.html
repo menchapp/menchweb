@@ -1,0 +1,216 @@
+<dom-module id="mench-my-projects">
+ <template>
+    <style is="custom-style">
+      :root {
+        height: 100%;
+      }
+      .flex {
+        @apply(--layout-flex);
+      }
+      .horizontal {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }       
+      .page {
+        height: 100%;
+        text-align: center;
+      }
+
+      #cards {
+        @apply(--layout-vertical);
+        @apply(--center-justified);
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .pink {
+        --paper-card-header-color: var(--paper-pink-500);
+      }   
+      #addNew {
+        cursor: pointer;
+      }
+      #addNew /deep/ paper-card {
+        border: 5px solid antiquewhite;
+      }
+      #addNew /deep/ img {
+        opacity: 0.5;
+      }
+      paper-dialog {
+        box-shadow: 1px 8px 15px 3px rgba(0, 0, 0, 0.14);
+      }
+      paper-dialog.size-position {
+        position: fixed;
+        top: 15%;
+        height: 600px;
+        width: 600px;
+        margin: 20px;
+        text-align: left;
+        font-family: 'Khula', sans-serif;
+      }      
+      paper-input, paper-textarea {
+        --paper-input-container-color: #7B9595;
+        --paper-input-container-focus-color: #94DBFF;
+        margin: 0px 10px;
+      }
+      .moreDetail paper-input {
+        display: inline-block;
+        width: 42%;
+      }
+      input[type="file"] {
+        margin: 15px 0px;
+/*        padding: 10px;
+        background-color: lightgrey;*/
+      }
+      input[type="submit"] {
+        border: none;
+        background-color: lightsteelblue;
+        font-family: 'Khula';
+        color: white;
+        padding: 8px 12px 5px;
+        border-radius: 7%;
+        cursor: pointer;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+      #imgUpload {
+        margin: 20px;
+        padding: 20px;
+        color: #7B9595;
+        border: 1px solid #7B9595;
+      }
+      #imgUpload img {
+        max-width: 300px;
+        max-height: 200px;
+        
+      }
+      #button-container {
+        text-align: center;
+      }
+      paper-button {
+        color: #7B9595;
+        margin: 10px 10px 0 10px;
+        font-size: 14px;
+      }       
+    </style>  
+
+
+    <div class="page">
+      <mench-rfp id="addNew" data="{{addNewCard}}"></mench-rfp>
+      <template is="dom-repeat" items="{{rfps}}">
+          <mench-rfp data="{{item}}"></mench-rfp>
+      </template>
+      <paper-dialog id="addNewDialog" class="size-position">
+        <div id='dialogContents'>
+          <div hidden$="{{showImageUpload}}">
+            <paper-input label="Title" value="{{title}}"></paper-input>
+            <paper-input label="Subtitle" value="{{subtitle}}"></paper-input>
+            <div class='moreDetail'>   
+                <paper-input label="Prize $" value="{{prize}}"></paper-input>
+                <paper-input label="Contest End Date" placeholder="yyyy-mm-dd" value="{{endDate}}"></paper-input>
+                <paper-input label="Hashtag" value="{{hashtag}}"></paper-input>
+                <paper-input label="Terms" placeholder="rf / rm" value="{{terms}}"></paper-input>
+                <paper-input label="Duration" value="{{duration}}"></paper-input>
+                <paper-input label="Intended Use" value="{{intendedUse}}"></paper-input>
+                <paper-input label="Territory" value="{{territory}}"></paper-input>
+                <paper-input label="Exclusivity" value="{{exclusivity}}"></paper-input>
+            </div>
+            <div><paper-textarea label="Details" rows="3" value="{{details}}"></paper-textarea></div>
+            <div id='button-container'><paper-button id='next'>Save & Continue</paper-button></div>
+          </div>
+        </div>
+
+        <div hidden$="{{!showImageUpload}}">
+          <div id="imgUpload" class="flex self-stretch">
+            Choose a reference image to help guide photographers! (Optional)<br>
+            <img src="{{rfpUrl}}">
+            <form action="{{rfpUploadUrl}}" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{csrfToken}}"/>
+            <input type="file" name="file"><br>
+            <input type="submit" name="submit" value="Upload">
+            </form>
+          </div>
+          <div id='button-container'><paper-button id='save'>Done</paper-button></div>  
+        </div>
+
+      </paper-dialog>    
+    </div>
+
+
+  </template>
+
+  <script>
+    Polymer({
+      is: "mench-my-projects",
+      ready: function() {
+        console.log('ready');
+        this.showImageUpload = false;
+        this.addNewCard = {
+          userId: 'userName',
+          title: "Add a Menchquest",
+          subtitle: "",
+          prize: "",
+          endDate: "dates that work for you",
+          details: "Describe what you're looking for, so you get just what you need!",
+          terms: "Royalty Free",
+          intendedUse: "Digital Media",
+          duration: "No restrictions",
+          territory: "Worldwide",
+          exclusivity: "No restrictions",
+          hashtag: "",
+          submissions: [],
+          img: "/icons/add_new.jpg"
+        };
+
+        this.rfps = [];
+
+
+
+
+      },
+      saveNewRfp: function() {
+        //Cookies.get('csrftoken')        
+        // x.open('POST', 'add-rfp.html?msg=hi');
+        // x.setRequestHeader("X-CSRFToken", "vn2HxXJLfxtEOdVdWccN9LzWh0VqiMuj");
+        // x.send({"a":3})
+        this.push('rfps', {
+          userId: userName,
+          title: this.title,
+          subtitle: this.subtitle,
+          prize: this.prize,
+          endDate: this.endDate,
+          details: this.details,
+          terms: this.terms,
+          intendedUse: this.intendedUse,
+          duration: this.duration,
+          territory: this.territory,
+          exclusivity: this.exclusivity,
+          hashtag: this.hashtag,
+          submissions: [],
+          img: this.rfpUrl || ""
+        });  
+        this.$.addNewDialog.close();
+      },
+      openAddNewDialog: function() {
+        this.$.addNewDialog.open();
+      },
+      next: function() {
+        this.showImageUpload = true;
+      },
+      properties: {
+        // declare properties for the element's public API
+        // street: {
+        //   type: String
+        // },
+        // apt: {
+        //   type: String
+        // }
+      },
+      listeners: {
+        'addNew.tap': 'openAddNewDialog',
+        'save.tap': 'saveNewRfp',
+        'next.tap': 'next',
+      }
+    });
+  </script>
+
+</dom-module>

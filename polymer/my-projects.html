@@ -122,7 +122,7 @@
         <div hidden$="{{!showImageUpload}}">
           <div id="imgUpload" class="flex self-stretch">
             Choose a reference image to help guide photographers! (Optional)<br>
-            <img src="{{rfpUrl}}">
+            <img src="{{editingRfpUrl}}">
             <form action="{{rfpUploadUrl}}" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="csrfmiddlewaretoken" value="{{csrfToken}}"/>
             <input type="file" name="file"><br>
@@ -136,13 +136,13 @@
     </div>
 
 
-  </template>
-
+  </template>;
   <script>
     Polymer({
       is: "mench-my-projects",
       ready: function() {
         console.log('ready');
+        this.csrfToken = Cookies.get('csrftoken');
         this.showImageUpload = false;
         this.addNewCard = {
           userId: 'userName',
@@ -162,16 +162,41 @@
         };
 
         this.rfps = [];
+        this.details = "";
 
-
-
-
+        this.rfpUploadUrl = rfpUploadUrl;
+        this.editingRfpUrl = editingRfpUrl;
+        if (editingRfpUrl) {
+          this.showImageUpload = true;
+          setTimeout(this.openAddNewDialog.bind(this), 1000);
+        }
       },
       saveNewRfp: function() {
-        //Cookies.get('csrftoken')        
-        // x.open('POST', 'add-rfp.html?msg=hi');
-        // x.setRequestHeader("X-CSRFToken", "vn2HxXJLfxtEOdVdWccN9LzWh0VqiMuj");
-        // x.send({"a":3})
+        var x = new XMLHttpRequest();
+        x.open('POST', 'add-rfp.html');
+        x.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+        x.onload = function(e) {
+          this.rfpUploadUrl = x.responseText;
+          this.next();
+        }.bind(this);
+        x.onerror = function(e) {
+          console.log('rpf post failed');
+        }        
+        x.send(JSON.stringify({
+          userId: userName,
+          title: this.title,
+          subtitle: this.subtitle,
+          prize: this.prize || 0,
+          endDate: this.endDate,
+          details: this.details,
+          terms: this.terms,
+          intendedUse: this.intendedUse,
+          duration: this.duration,
+          territory: this.territory,
+          exclusivity: this.exclusivity,
+          hashtag: this.hashtag
+        }));
+
         this.push('rfps', {
           userId: userName,
           title: this.title,
@@ -188,11 +213,14 @@
           submissions: [],
           img: this.rfpUrl || ""
         });  
-        this.$.addNewDialog.close();
+        //this.$.addNewDialog.close();
       },
       openAddNewDialog: function() {
         this.$.addNewDialog.open();
       },
+      closeAddNewDialog: function() {
+        this.$.addNewDialog.close();
+      },      
       next: function() {
         this.showImageUpload = true;
       },
@@ -207,8 +235,8 @@
       },
       listeners: {
         'addNew.tap': 'openAddNewDialog',
-        'save.tap': 'saveNewRfp',
-        'next.tap': 'next',
+        'save.tap': 'closeAddNewDialog',
+        'next.tap': 'saveNewRfp',
       }
     });
   </script>

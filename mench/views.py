@@ -1,5 +1,6 @@
 import json
 import cgi
+import datetime
 from google.appengine.api import users
 from django import http
 from django.shortcuts import render_to_response
@@ -41,8 +42,26 @@ def add_rfp(request):
     return HttpResponse("User not logged in.")  
   if request.method != 'POST':
     return HttpResponse("Add RFP only accepts POSTs")  
-  print request.body
-  return HttpResponse("Success!")  
+  data = json.loads(request.body)
+
+  year, month, day = data['endDate'].split('-')
+  end_date = datetime.date(int(year), int(month), int(day))
+
+  rfp = Rfp(user=user.user_id(),
+            title=data['title'],
+            subtitle=data['subtitle'],
+            prize=int(data['prize']),
+            endDate=end_date,
+            details=data['details'],
+            terms=data['terms'],
+            intendedUse=data['intendedUse'],
+            duration=data['duration'],
+            territory=data['territory'],
+            exclusivity=data['exclusivity'],
+            hashtag=data['hashtag'])  
+  rfp.put()
+  return HttpResponse(blobstore.create_upload_url('/upload-rfp-photo/' 
+                                                  + str(rfp.key.id())))  
 
 def save_profile(request):
   user = users.get_current_user()
@@ -87,21 +106,39 @@ def browse_projects(request):
 
 @ensure_csrf_cookie
 def my_projects(request):
+
+  # if profile_query.count() > 0:
+  #   profile = profile_query.fetch()
+  #   blob_key = profile[0].to_dict()['blob_key']
+  #   profile_url = images.get_serving_url(blob_key)
+  # else:
+  #   profile_url = ""
+
+  if request.GET.__contains__("key"):  
+    rfp_img_key = request.GET.__getitem__("key")
+    rfp_img_url = images.get_serving_url(rfp_img_key)
+  else:
+    rfp_img_url = ""
+
+  if request.GET.__contains__("rfp_key"):  
+    rfp_img_upload_key = request.GET.__getitem__("rfp_key")
+    rfp_img_upload_url = blobstore.create_upload_url('/upload-rfp-photo/%s' % rfp_img_upload_key)
+  else:
+    rfp_img_upload_url = ""
+
   user = users.get_current_user()
   if user:
     context = Context({
       'user_name': user.nickname(),
       'login_url': "",
       'logout_url': users.create_logout_url('/'),
-      'logged_in': True
+      'logged_in': True,
+      'rfp_img_url': rfp_img_url,
+      'rfp_img_upload_url': rfp_img_upload_url
     }, autoescape=False)
   else:
-    context = Context({
-      'user_name': "",
-      'login_url': users.create_login_url('/'),
-      'logout_url': "",
-      'logged_in': False
-    }, autoescape=False)
+    return HttpResponseRedirect('/browse-projects.html')
+  
   template = loader.get_template('my-projects.html')
   return HttpResponse(template.render(context))  
 
@@ -146,34 +183,31 @@ def my_profile(request):
   return HttpResponse(template.render(context))  
 
 def test(request):
-  upload_url = blobstore.create_upload_url('/upload-photo.html')
-  # The method must be "POST" and enctype must be set to "multipart/form-data".
-  # user = users.get_current_user()
-  # if user:
-  #   name = user.nickname()
-  #   login_url = users.create_logout_url('/')
-  #   greeting = ('Welcome, %s! (<a href="%s">sign out</a>)' %
-  #              (user.nickname(), users.create_logout_url('/')))
-  # else:
-  #   name = "friend"
-  #   login_url = users.create_login_url('/')
-  #   greeting = ('<a href="%s">Sign in or register</a>.' %
-  #               users.create_login_url('/'))
+  upload_url = blobstore.create_upload_url('/upload-rfp-photo/12345')
 
-  profile_query = UserPhoto.query(UserPhoto.user == users.get_current_user().user_id())
+  # profile_query = UserPhoto.query(UserPhoto.user == users.get_current_user().user_id())
+  # profile = profile_query.fetch()
+  # print profile[0].to_dict()['blob_key']
+  profile_query = RfpPhoto.query(RfpPhoto.rfp_key == '12345')
   profile = profile_query.fetch()
-  print profile[0].to_dict()['blob_key']
+
+  if profile_query.count() > 0:
+    profile = profile_query.fetch()
+    blob_key = profile[0].to_dict()['blob_key']
+    profile_url = images.get_serving_url(blob_key)
+  else:
+    profile_url = ""
 
   template = loader.get_template('test.html')
   # # Context is a normal Python dictionary whose keys can be accessed in the template index.html
   context = Context({
     'url': upload_url,
-    'profile_url': images.get_serving_url(profile[0].to_dict()['blob_key'])
+    'profile_url': profile_url
   })
   context.update(csrf(request))
   return HttpResponse(template.render(context))
 
-def photo_upload_handler(request):
+def profile_photo_upload_handler(request):
   image = request.FILES['file']
   image_key = image.blobstore_info.key()
   user_photo = UserPhoto(user=users.get_current_user().user_id(),
@@ -181,11 +215,11 @@ def photo_upload_handler(request):
   user_photo.put()
   return HttpResponseRedirect('/my-profile.html?key='+str(image_key))
 
-def rfp_photo_upload_handler(request):
+def rfp_photo_upload_handler(request, rfp_key):
   image = request.FILES['file']
   image_key = image.blobstore_info.key()
-  user_photo = UserPhoto(user=users.get_current_user().user_id(),
-                         blob_key=image_key)
-  user_photo.put()
-  return HttpResponseRedirect('/my-profile.html?key='+str(image_key))
+  rfp_photo = RfpPhoto(rfp_key=rfp_key,
+                       blob_key=image_key)
+  rfp_photo.put()
+  return HttpResponseRedirect('/my-projects.html?key=%s&rfp=%s' % (str(image_key), rfp_key))
 

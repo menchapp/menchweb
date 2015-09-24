@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     url(r'test', 'mench.views.test'),  
     url(r'add-rfp.html', 'mench.views.add_rfp'),    
     url(r'upload-profile-photo.html', 'mench.views.profile_photo_upload_handler'),    
-    url(r'upload-rfp-photo.html', 'mench.views.rfp_photo_upload_handler'),        
+    url(r'upload-rfp-photo/(?P<rfp_key>[0-9]+)', 'mench.views.rfp_photo_upload_handler'),        
     url(r'save-user-profile.html', 'mench.views.save_profile'),    
     url(r'^$', 'mench.views.browse_projects'),
 )

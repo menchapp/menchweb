@@ -2,6 +2,7 @@ from google.appengine.ext import ndb
 from google.appengine.ext import blobstore
 from google.appengine.ext import ndb
 from google.appengine.ext.webapp import blobstore_handlers
+from google.appengine.api import images
 
 # Create your models here.
 class UserPhoto(ndb.Model):
@@ -42,4 +43,11 @@ class Rfp(ndb.Model):
   def to_dict(self):
     result = super(Rfp, self).to_dict()
     result['id'] = self.key.id()
+    photo_query = RfpPhoto.query(RfpPhoto.rfp_key == str(self.key.id()))
+    if photo_query.count() > 0:
+      photo = photo_query.fetch()
+      photo_url = images.get_serving_url(photo[0].to_dict()['blob_key'])
+    else:
+      photo_url = ""
+    result['img'] = photo_url
     return result  

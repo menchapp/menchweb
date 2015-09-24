@@ -4,7 +4,7 @@ import datetime
 from google.appengine.api import users
 from django import http
 from django.shortcuts import render_to_response
-from django.http import HttpResponse, HttpResponseRedirect 
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import Context, loader 
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -16,11 +16,10 @@ from google.appengine.ext import ndb
 from google.appengine.api import images
 from google.appengine.ext.webapp import blobstore_handlers
 
-
 from djangoappengine import storage
+
 class BlobstoreFileUploadHandler(storage.BlobstoreFileUploadHandler):
   """Handler that adds blob key info to the file object."""
-
   def new_file(self, field_name, *args, **kwargs):
     # We need to re-process the POST data to get the blobkey info.
     meta = self.request.META
@@ -32,9 +31,27 @@ class BlobstoreFileUploadHandler(storage.BlobstoreFileUploadHandler):
     super(BlobstoreFileUploadHandler, self).new_file(field_name,
                                                      *args, **kwargs)
 
+class DatetimeEncoder(json.JSONEncoder):
+  def default(self, obj):
+    if isinstance(obj, datetime.datetime):
+      return obj.strftime('%Y-%m-%dT%H:%M:%SZ')
+    elif isinstance(obj, datetime.date):
+      return obj.strftime('%Y-%m-%d')
+    # Let the base class default method raise the TypeError
+    return json.JSONEncoder.default(self, obj)  
 
 def home(request):
 	return http.HttpResponse('Hello World!')
+
+def get_rfp(request):
+  user = users.get_current_user()
+  if user:
+    rfp_query = Rfp.query(Rfp.user == user.user_id())
+    if rfp_query.count() > 0:
+      rfps = rfp_query.fetch()
+      rfps_dict = [rfp.to_dict() for rfp in rfps]
+      return HttpResponse(json.dumps({'rfps': rfps_dict}, cls=DatetimeEncoder), content_type="application/json")
+  return HttpResponse(json.dumps({'rfps': None}), content_type="application/json")
 
 def add_rfp(request):
   user = users.get_current_user()

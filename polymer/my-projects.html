@@ -102,19 +102,19 @@
       <paper-dialog id="addNewDialog" class="size-position">
         <div id='dialogContents'>
           <div hidden$="{{showImageUpload}}">
-            <paper-input label="Title" value="{{title}}"></paper-input>
-            <paper-input label="Subtitle" value="{{subtitle}}"></paper-input>
+            <paper-input label="Title" value="{{data.title}}"></paper-input>
+            <paper-input label="Subtitle" value="{{data.subtitle}}"></paper-input>
             <div class='moreDetail'>   
-                <paper-input label="Prize $" value="{{prize}}"></paper-input>
-                <paper-input label="Contest End Date" placeholder="yyyy-mm-dd" value="{{endDate}}"></paper-input>
-                <paper-input label="Hashtag" value="{{hashtag}}"></paper-input>
-                <paper-input label="Terms" placeholder="rf / rm" value="{{terms}}"></paper-input>
-                <paper-input label="Duration" value="{{duration}}"></paper-input>
-                <paper-input label="Intended Use" value="{{intendedUse}}"></paper-input>
-                <paper-input label="Territory" value="{{territory}}"></paper-input>
-                <paper-input label="Exclusivity" value="{{exclusivity}}"></paper-input>
+                <paper-input label="Prize $" value="{{data.prize}}"></paper-input>
+                <paper-input label="Contest End Date" placeholder="yyyy-mm-dd" value="{{data.endDate}}"></paper-input>
+                <paper-input label="Hashtag" value="{{data.hashtag}}"></paper-input>
+                <paper-input label="Terms" placeholder="rf / rm" value="{{data.terms}}"></paper-input>
+                <paper-input label="Duration" value="{{data.duration}}"></paper-input>
+                <paper-input label="Intended Use" value="{{data.intendedUse}}"></paper-input>
+                <paper-input label="Territory" value="{{data.territory}}"></paper-input>
+                <paper-input label="Exclusivity" value="{{data.exclusivity}}"></paper-input>
             </div>
-            <div><paper-textarea label="Details" rows="3" value="{{details}}"></paper-textarea></div>
+            <div><paper-textarea label="Details" rows="3" value="{{data.details}}"></paper-textarea></div>
             <div id='button-container'><paper-button id='next'>Save & Continue</paper-button></div>
           </div>
         </div>
@@ -162,14 +162,43 @@
         };
 
         this.rfps = [];
-        this.details = "";
+        this.data = {
+          userId: userName,
+          title: "",
+          subtitle: "",
+          prize: "",
+          endDate: "",
+          details: "",
+          terms: "",
+          intendedUse: "",
+          duration: "",
+          territory: "",
+          exclusivity: "",
+          hashtag: ""
+        };
 
         this.rfpUploadUrl = rfpUploadUrl;
         this.editingRfpUrl = editingRfpUrl;
         if (editingRfpUrl) {
-          this.showImageUpload = true;
-          setTimeout(this.openAddNewDialog.bind(this), 1000);
+          setTimeout(function () {
+            this.openAddNewDialog();
+            this.showImageUpload = true;
+          }.bind(this), 1000);
         }
+        var x = new XMLHttpRequest();
+        x.open('GET', 'get-rfp.html');
+        x.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+        x.onload = function(e) {
+          console.log(x.responseText);
+          var rfps = JSON.parse(x.responseText)['rfps'];
+          for (var i = 0; i < rfps.length; i++) {
+            this.push('rfps', rfps[i]);
+          }
+        }.bind(this);
+        x.onerror = function(e) {
+          console.log('rfp get failed');
+        }        
+        x.send();
       },
       saveNewRfp: function() {
         var x = new XMLHttpRequest();
@@ -184,38 +213,39 @@
         }        
         x.send(JSON.stringify({
           userId: userName,
-          title: this.title,
-          subtitle: this.subtitle,
-          prize: this.prize || 0,
-          endDate: this.endDate,
-          details: this.details,
-          terms: this.terms,
-          intendedUse: this.intendedUse,
-          duration: this.duration,
-          territory: this.territory,
-          exclusivity: this.exclusivity,
-          hashtag: this.hashtag
+          title: this.data.title,
+          subtitle: this.data.subtitle,
+          prize: this.data.prize || 0,
+          endDate: this.data.endDate,
+          details: this.data.details,
+          terms: this.data.terms,
+          intendedUse: this.data.intendedUse,
+          duration: this.data.duration,
+          territory: this.data.territory,
+          exclusivity: this.data.exclusivity,
+          hashtag: this.data.hashtag
         }));
 
-        this.push('rfps', {
-          userId: userName,
-          title: this.title,
-          subtitle: this.subtitle,
-          prize: this.prize,
-          endDate: this.endDate,
-          details: this.details,
-          terms: this.terms,
-          intendedUse: this.intendedUse,
-          duration: this.duration,
-          territory: this.territory,
-          exclusivity: this.exclusivity,
-          hashtag: this.hashtag,
-          submissions: [],
-          img: this.rfpUrl || ""
-        });  
+        // this.push('rfps', {
+        //   userId: userName,
+        //   title: this.title,
+        //   subtitle: this.subtitle,
+        //   prize: this.prize,
+        //   endDate: this.endDate,
+        //   details: this.details,
+        //   terms: this.terms,
+        //   intendedUse: this.intendedUse,
+        //   duration: this.duration,
+        //   territory: this.territory,
+        //   exclusivity: this.exclusivity,
+        //   hashtag: this.hashtag,
+        //   submissions: [],
+        //   img: this.rfpUrl || ""
+        // });  
         //this.$.addNewDialog.close();
       },
       openAddNewDialog: function() {
+        this.showImageUpload = false;
         this.$.addNewDialog.open();
       },
       closeAddNewDialog: function() {

@@ -1,3 +1,4 @@
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <dom-module id="mench-rfp">
  <template>
     <style is="custom-style">
@@ -27,6 +28,7 @@
         text-align: center;
       }
       .fancy .title {
+        max-width: 210px;
         margin-left: 20px;
         font-size: 20px;
         color: #767693;
@@ -37,7 +39,8 @@
       }
       .fancy .big {
         font-size: 22px;
-        padding-bottom: 0px;
+        padding-bottom: 10px;
+        line-height: 24px;
         color: var(--google-grey-500);
       }
       .fancy .medium {
@@ -48,6 +51,12 @@
       .pink {
         --paper-card-header-color: var(--paper-pink-500);
       }   
+      #iconContainer {
+        cursor: pointer;
+      }
+      #iconContainer:hover {
+        color:#94DBFF;
+      }
     </style>  
 
     <paper-card class='fancy'>
@@ -65,8 +74,15 @@
 
       <div class="card-content">
         <div class="big">{{data.subtitle}}</div>
-        <div class="medium">{{data.details}}</div>
-        <div class="small"><i>Contest closes on <span>{{data.endDate}}</span></i></div>
+        <div class='horizontal'>
+          <div class='flex'>
+            <div class="medium">{{data.details}}</div>
+            <div class="small"><i>Contest closes on <span>{{data.endDate}}</span></i></div>
+          </div>
+          <div id='iconContainer' hidden$="{{!data.id}}">
+            <iron-icon icon="arrow-forward"></iron-icon>
+          </div>
+        </div>        
       </div>
     </paper-card>    
 
@@ -77,6 +93,13 @@
       is: "mench-rfp",
       ready: function() {
         console.log('ready');
+      },
+      openDetailedPage: function() {
+        if (loggedIn) {
+          window.location = 'rfp/' + this.data.id;
+        } else {
+          this.fire('pleaseLogin');
+        }
       },
       properties: {
         data: {
@@ -102,6 +125,7 @@
         }
       },
       listeners: {
+        'iconContainer.tap': 'openDetailedPage'
       }
     });
   </script>

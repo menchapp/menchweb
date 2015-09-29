@@ -43,7 +43,7 @@ class DatetimeEncoder(json.JSONEncoder):
 def home(request):
 	return http.HttpResponse('Hello World!')
 
-def get_rfp(request):
+def get_my_rfp(request):
   user = users.get_current_user()
   if user:
     rfp_query = Rfp.query(Rfp.user == user.user_id())
@@ -52,6 +52,72 @@ def get_rfp(request):
       rfps_dict = [rfp.to_dict() for rfp in rfps]
       return HttpResponse(json.dumps({'rfps': rfps_dict}, cls=DatetimeEncoder), content_type="application/json")
   return HttpResponse(json.dumps({'rfps': None}), content_type="application/json")
+
+def get_rfp(request):
+  user = users.get_current_user()
+  if user:
+    rfp_query = Rfp.query(Rfp.user != user.user_id())
+  else: 
+    rfp_query = Rfp.query()
+  if rfp_query.count() > 0:
+    rfps = rfp_query.fetch()
+    rfps_dict = [rfp.to_dict() for rfp in rfps]
+    return HttpResponse(json.dumps({'rfps': rfps_dict}, cls=DatetimeEncoder), content_type="application/json")
+  return HttpResponse(json.dumps({'rfps': None}), content_type="application/json")
+
+def get_submissions(request, rfp_key):
+  user = users.get_current_user()
+  if user:
+    rfp = Rfp.get_by_id(int(rfp_key))
+    if rfp:
+      rfp_info = json.dumps(rfp.to_dict(), cls=DatetimeEncoder)
+      if rfp.to_dict()['user'] != user.user_id():
+        return HttpResponse(json.dumps({'submissions': None}), content_type="application/json")
+
+    submission_query = Submission.query(Submission.rfp_key == rfp_key)
+    if submission_query.count() > 0:
+      submissions = submission_query.fetch()
+      submission_img_urls = [images.get_serving_url(s.to_dict()['blob_key']) for s in submissions]
+    return HttpResponse(json.dumps({'submissions': submission_img_urls}), content_type="application/json")
+  return HttpResponse(json.dumps({'submissions': None}), content_type="application/json")
+
+def rfp(request, rfp_key):
+  user = users.get_current_user()
+  print rfp_key
+
+  if user:
+    submission_query = Submission.query(Submission.user == user.user_id())
+    submission_img_url = ""
+    if submission_query.count() > 0:
+      submissions = submission_query.fetch()
+      for s in submissions:
+        s_dict = s.to_dict()
+        if s_dict['rfp_key'] == rfp_key:
+          submission_img_url = images.get_serving_url(s_dict['blob_key'])
+    elif request.GET.__contains__("key"):  
+      submission_img_url = images.get_serving_url(request.GET.__getitem__("key"))
+
+    rfp = Rfp.get_by_id(int(rfp_key))
+    mine = False
+    if rfp:
+      rfp_info = json.dumps(rfp.to_dict(), cls=DatetimeEncoder)
+      if rfp.to_dict()['user'] == user.user_id():
+        mine = True
+    else:
+      rfp_info = None
+    context = Context({
+      'user_name': user.nickname(),
+      'login_url': "",
+      'logout_url': users.create_logout_url('/'),
+      'logged_in': True,
+      'rfp_info': rfp_info,
+      'mine' : mine,
+      'submission_img_url' : submission_img_url,
+      'submission_img_upload_url': blobstore.create_upload_url('/upload-rfp-submission/%s' % rfp_key)
+    }, autoescape=False)
+    template = loader.get_template('rfp.html')
+    return HttpResponse(template.render(context))  
+  return HttpResponseRedirect('/browse-projects.html')
 
 def add_rfp(request):
   user = users.get_current_user()
@@ -65,6 +131,7 @@ def add_rfp(request):
   end_date = datetime.date(int(year), int(month), int(day))
 
   rfp = Rfp(user=user.user_id(),
+            userName=data['userName'],
             title=data['title'],
             subtitle=data['subtitle'],
             prize=int(data['prize']),
@@ -77,8 +144,8 @@ def add_rfp(request):
             exclusivity=data['exclusivity'],
             hashtag=data['hashtag'])  
   rfp.put()
-  return HttpResponse(blobstore.create_upload_url('/upload-rfp-photo/' 
-                                                  + str(rfp.key.id())))  
+  return HttpResponse(
+    json.dumps({'url':  blobstore.create_upload_url('/upload-rfp-photo/%s' % str(rfp.key.id()))}), content_type="application/json")
 
 def save_profile(request):
   user = users.get_current_user()
@@ -231,6 +298,16 @@ def profile_photo_upload_handler(request):
                          blob_key=image_key)
   user_photo.put()
   return HttpResponseRedirect('/my-profile.html?key='+str(image_key))
+
+def submission_photo_upload_handler(request, rfp_key):
+  user = users.get_current_user()
+  image = request.FILES['file']
+  image_key = image.blobstore_info.key()
+  submission = Submission(user=user.user_id(),
+                          rfp_key=rfp_key,
+                          blob_key=image_key)
+  submission.put()
+  return HttpResponseRedirect('/rfp/%s?key=%s' % (rfp_key, str(image_key)))
 
 def rfp_photo_upload_handler(request, rfp_key):
   image = request.FILES['file']

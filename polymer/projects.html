@@ -44,86 +44,101 @@
   	  ready: function() {
   	  	console.log('ready');
         this.rfps = [];
-        this.push('rfps', {
-          userId: 'menchapp@gmail.com',
-          title: "Kinetic park photos",
-          subtitle: "Something that feels energetic!",
-          prize: 300,
-          endDate: "2015-11-01",
-          details: "Colorful, fun, playful",
-          terms: "Royalty Free",
-          intendedUse: "Digital Media",
-          duration: "No restrictions",
-          territory: "Worldwide",
-          exclusivity: "No restrictions",
-          hashtag: "",
-          submissions: [],
-          img: "/icons/carousel.jpg"
-        }); 
-        this.push('rfps', {
-          userId: 'menchapp@gmail.com',
-          title: "Beach photos for Instagram",
-          subtitle: "Summer is here!",
-          prize: 200,
-          endDate: "2015-10-17",
-          details: "We're looking for photos on the beach with a bright color scheme.",
-          terms: "Royalty Free",
-          intendedUse: "Digital Media",
-          duration: "No restrictions",
-          territory: "Worldwide",
-          exclusivity: "No restrictions",
-          hashtag: "",
-          submissions: [],
-          img: "/icons/beach.jpg"
-        });  
-        this.push('rfps', {
-          userId: 'menchapp@gmail.com',
-          title: "Fun fruits",
-          subtitle: "",
-          prize: 150,
-          endDate: "2016-01-30",
-          details: "For our multicultural cookbook.",
-          terms: "Royalty Free",
-          intendedUse: "Digital Media",
-          duration: "No restrictions",
-          territory: "Worldwide",
-          exclusivity: "No restrictions",
-          hashtag: "",
-          submissions: [],
-          img: "/icons/starfruit.jpg"
-        });  
-        this.push('rfps', {
-          userId: 'menchapp@gmail.com',
-          title: "Old farmhouse in field",
-          subtitle: "",
-          prize: 150,
-          endDate: "2015-12-12",
-          details: "Should look abandoned. During the day, flexible color scheme.",
-          terms: "Royalty Free",
-          intendedUse: "Digital Media",
-          duration: "No restrictions",
-          territory: "Worldwide",
-          exclusivity: "No restrictions",
-          hashtag: "",
-          submissions: [],
-          img: "/icons/farmhouse.jpg"
-        });  
-        this.push('rfps', {
-          userId: 'menchapp@gmail.com',
-          title: "Latte art in maroon mug",
-          subtitle: "",
-          prize: 35,
-          endDate: "2015-12-01",
-          details: "Needed to fit the color scheme of our coffee shop",
-          terms: "Royalty Free",
-          intendedUse: "Digital Media",
-          duration: "No restrictions",
-          territory: "Worldwide",
-          exclusivity: "No restrictions",
-          hashtag: "",
-          submissions: [],
-          img: "/icons/latte.JPG"
-        });  
+        var x = new XMLHttpRequest();
+        x.open('GET', 'get-rfp.html');
+        x.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+        x.onload = function(e) {
+          console.log(x.responseText);
+          var rfps = JSON.parse(x.responseText)['rfps'];
+          for (var i = 0; i < rfps.length; i++) {
+            this.push('rfps', rfps[i]);
+          }
+        }.bind(this);
+        x.onerror = function(e) {
+          console.log('rfp get failed');
+        }        
+        x.send();
+
+        // this.push('rfps', {
+        //   userId: 'menchapp@gmail.com',
+        //   title: "Kinetic park photos",
+        //   subtitle: "Something that feels energetic!",
+        //   prize: 300,
+        //   endDate: "2015-11-01",
+        //   details: "Colorful, fun, playful",
+        //   terms: "Royalty Free",
+        //   intendedUse: "Digital Media",
+        //   duration: "No restrictions",
+        //   territory: "Worldwide",
+        //   exclusivity: "No restrictions",
+        //   hashtag: "",
+        //   submissions: [],
+        //   img: "/icons/carousel.jpg"
+        // }); 
+        // this.push('rfps', {
+        //   userId: 'menchapp@gmail.com',
+        //   title: "Beach photos for Instagram",
+        //   subtitle: "Summer is here!",
+        //   prize: 200,
+        //   endDate: "2015-10-17",
+        //   details: "We're looking for photos on the beach with a bright color scheme.",
+        //   terms: "Royalty Free",
+        //   intendedUse: "Digital Media",
+        //   duration: "No restrictions",
+        //   territory: "Worldwide",
+        //   exclusivity: "No restrictions",
+        //   hashtag: "",
+        //   submissions: [],
+        //   img: "/icons/beach.jpg"
+        // });  
+        // this.push('rfps', {
+        //   userId: 'menchapp@gmail.com',
+        //   title: "Fun fruits",
+        //   subtitle: "",
+        //   prize: 150,
+        //   endDate: "2016-01-30",
+        //   details: "For our multicultural cookbook.",
+        //   terms: "Royalty Free",
+        //   intendedUse: "Digital Media",
+        //   duration: "No restrictions",
+        //   territory: "Worldwide",
+        //   exclusivity: "No restrictions",
+        //   hashtag: "",
+        //   submissions: [],
+        //   img: "/icons/starfruit.jpg"
+        // });  
+        // this.push('rfps', {
+        //   userId: 'menchapp@gmail.com',
+        //   title: "Old farmhouse in field",
+        //   subtitle: "",
+        //   prize: 150,
+        //   endDate: "2015-12-12",
+        //   details: "Should look abandoned. During the day, flexible color scheme.",
+        //   terms: "Royalty Free",
+        //   intendedUse: "Digital Media",
+        //   duration: "No restrictions",
+        //   territory: "Worldwide",
+        //   exclusivity: "No restrictions",
+        //   hashtag: "",
+        //   submissions: [],
+        //   img: "/icons/farmhouse.jpg"
+        // });  
+        // this.push('rfps', {
+        //   userId: 'menchapp@gmail.com',
+        //   title: "Latte art in maroon mug",
+        //   subtitle: "",
+        //   prize: 35,
+        //   endDate: "2015-12-01",
+        //   details: "Needed to fit the color scheme of our coffee shop",
+        //   terms: "Royalty Free",
+        //   intendedUse: "Digital Media",
+        //   duration: "No restrictions",
+        //   territory: "Worldwide",
+        //   exclusivity: "No restrictions",
+        //   hashtag: "",
+        //   submissions: [],
+        //   img: "/icons/latte.JPG"
+        // });  
 //Cookies.get('csrftoken')        
 // x.open('POST', 'add-rfp.html?msg=hi');
 // x.setRequestHeader("X-CSRFToken", "vn2HxXJLfxtEOdVdWccN9LzWh0VqiMuj");

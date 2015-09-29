@@ -186,7 +186,7 @@
           }.bind(this), 1000);
         }
         var x = new XMLHttpRequest();
-        x.open('GET', 'get-rfp.html');
+        x.open('GET', 'get-my-rfp.html');
         x.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
         x.onload = function(e) {
           console.log(x.responseText);
@@ -205,14 +205,14 @@
         x.open('POST', 'add-rfp.html');
         x.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
         x.onload = function(e) {
-          this.rfpUploadUrl = x.responseText;
+          this.rfpUploadUrl = JSON.parse(x.responseText)['url'];
           this.next();
         }.bind(this);
         x.onerror = function(e) {
           console.log('rpf post failed');
         }        
         x.send(JSON.stringify({
-          userId: userName,
+          userName: userName,
           title: this.data.title,
           subtitle: this.data.subtitle,
           prize: this.data.prize || 0,

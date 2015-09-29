@@ -55,6 +55,9 @@
       paper-dialog {
         box-shadow: 1px 8px 15px 3px rgba(0, 0, 0, 0.14);
       }
+      .pleaseLogin {
+        width: 200px;
+      }
       paper-dialog.size-position {
         position: fixed;
         top: 55px;
@@ -110,6 +113,9 @@
         <div><a href="/my-profile.html">My Profile</a></div>
         <div><a href="{{logoutUrl}}">Logout</a></div>
       </paper-dialog>
+      <paper-dialog id="pleaseLogin">
+        <div>Please login before continuing.</div>
+      </paper-dialog>      
     </paper-header-panel>
 
   	
@@ -127,6 +133,9 @@
       toggleUserActions: function() {
         this.$.position.toggle();
       },
+      openLoginMessage: function() {
+        this.$.pleaseLogin.open();
+      },      
       properties: {
         // declare properties for the element's public API
         greeting: {
@@ -139,7 +148,8 @@
         }
       },
       listeners: {
-        'userActions.tap' : 'toggleUserActions'
+        'userActions.tap' : 'toggleUserActions',
+        'pleaseLogin' : 'openLoginMessage'
       }, 
     });
   </script>

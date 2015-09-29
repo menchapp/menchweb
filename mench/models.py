@@ -16,6 +16,12 @@ class RfpPhoto(ndb.Model):
   # blob_key = blobstore.BlobReferenceProperty()
   blob_key = ndb.BlobKeyProperty()
 
+class Submission(ndb.Model):
+  rfp_key = ndb.StringProperty()
+  user = ndb.StringProperty()
+  # blob_key = blobstore.BlobReferenceProperty()
+  blob_key = ndb.BlobKeyProperty()
+
 class Profile(ndb.Model):
   user = ndb.StringProperty()
   brand = ndb.StringProperty()
@@ -28,6 +34,7 @@ class Profile(ndb.Model):
 
 class Rfp(ndb.Model):
   user = ndb.StringProperty()
+  userName = ndb.StringProperty()
   title = ndb.StringProperty()
   subtitle = ndb.StringProperty()
   prize = ndb.IntegerProperty()

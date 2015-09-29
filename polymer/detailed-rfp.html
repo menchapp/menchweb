@@ -1,0 +1,185 @@
+<dom-module id="mench-detailed-rfp">
+ <template>
+    <style is="custom-style">
+      .page {
+        height: 100%;
+        text-align: center;
+      }
+
+      .flex {
+        @apply(--layout-flex);
+      }
+      .horizontal {
+        @apply(--layout-horizontal);
+      }       
+      .center {
+        @apply(--layout-center);
+      }             
+      paper-card {
+        vertical-align: top;
+        width: 80%;
+        max-width: 800px;
+        margin: 30px;
+        text-align: left;
+        font-family: 'Khula', sans-serif;
+      }
+      h1, h3 {
+        margin: 0px;
+      }      
+      #cardContents {
+        padding: 30px;
+        font-size: 14px;
+      }      
+      paper-input, paper-textarea {
+        --paper-input-container-color: #7B9595;
+        --paper-input-container-focus-color: #94DBFF;
+        margin: 0px 10px;
+      }
+      paper-input {
+        max-width: 200px;
+      }
+      input[type="file"] {
+        margin: 15px 0px;
+      }
+      input[type="submit"] {
+        border: none;
+        background-color: lightsteelblue;
+        font-family: 'Khula';
+        color: white;
+        padding: 8px 12px 5px;
+        border-radius: 7%;
+        cursor: pointer;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+      #imgUpload, #submissions {
+        margin: 20px 0px;
+      }
+      #imgUpload img, #submissions img {
+        max-width: 300px;
+        max-height: 200px;
+        
+      }
+      #button-container {
+        text-align: center;
+      }
+      paper-button {
+        color: #7B9595;
+        margin: 10px 10px 0 10px;
+        font-size: 14px;
+      }
+      #allInfo div {
+        padding-bottom: 20px;
+      }
+      #highlightedInfo span {
+        font-size: 20px
+      }
+      .border {
+        border-bottom: 1px solid lightgrey;
+        margin-bottom: 15px;
+      }
+      span {
+        color: darkslateblue;
+        display: block;
+        font-size: 16px;
+      }  
+      a {
+        text-decoration: none;
+        color: darkslateblue;
+      }
+      a:hover {
+        color: #333;
+      }
+    </style>  
+
+    <div class='page'>
+      <paper-card class='fancy'>
+        <div id='cardContents'>
+            <div id="allInfo" class='border'>
+              <h1>{{data.title}}</h1>
+              <div style='font-size: 18px'>{{data.subtitle}}</div>
+              <div class='border'>
+                Requested by <span style="font-size: 16px; line-height: 16px;">{{data.userName}}</span>
+              </div>
+              <div  id="highlightedInfo" class='horizontal' style="padding-bottom: 0px">
+                <div class='flex'>Prize <span>$<a>{{data.prize}}</a></span></div>
+                <div class='flex'>Contest ends on <span>{{data.endDate}}</span></div>
+                <div class='flex'>Terms <span>{{data.terms}}</span></div>
+              </div>
+              <div>Details and requirements <span>{{data.details}}</span></div>
+              <div>Intended Use <span>{{data.intendedUse}}</span></div>
+              <div>Duration <span>{{data.duration}}</span></div>
+              <div>Territory <span>{{data.territory}}</span></div>
+              <div>Exclusivity <span>{{data.exclusivity}}</span></div>
+              <div>Hashtag <span>{{data.hashtag}}</span></div>
+            </div>
+            <div id="submissions" class="flex self-stretch" hidden$="{{!mine}}">
+              <h3>Submissions</h3>
+              <div hidden$="{{haveSubmissions}}">No submissions yet. They must be on their way!</div>
+              <template is="dom-repeat" items="{{submissions}}">
+                <img src="{{item}}">
+              </template>
+            </div>
+            <div id="imgUpload" class="flex self-stretch" hidden$="{{mine}}">
+              <h3>Submit a Photo</h3>
+              <img src="{{submissionImgUrl}}">
+              <form action="{{submissionImgUploadUrl}}" method="POST" enctype="multipart/form-data">
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{csrfToken}}"/>
+              <input type="file" name="file"><br>
+              <input type="submit" name="submit" value="Upload">
+              </form>
+            </div>
+            <a href="{{backUrl}}">Back</a>
+          </div>
+      </paper-card>    
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: "mench-detailed-rfp",
+      ready: function() {
+        this.mine = mine;
+        this.haveSubmissions = false;
+        if (this.mine) {
+          this.backUrl = '/my-projects.html';
+        } else {
+          this.backUrl = '/browse-projects.html';
+        }
+        this.submissionImgUrl = submissionImgUrl;
+        this.submissionImgUploadUrl = submissionImgUploadUrl;
+        this.csrfToken = Cookies.get('csrftoken');
+        this.data = rfpInfo;
+
+        if (!this.data.terms) {
+          this.data.terms = '---';
+        }
+
+
+        var x = new XMLHttpRequest();
+        this.submissions = [];
+        x.open('GET', 'submissions/' + this.data.id);
+        x.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+        x.onload = function(e) {
+          console.log(x.responseText);
+          var submissions = JSON.parse(x.responseText)['submissions'];
+          if (submissions.length > 0){
+            this.haveSubmissions = true;
+          }
+          for (var i = 0; i < submissions.length; i++) {
+            this.push('submissions', submissions[i]);
+          }
+        }.bind(this);
+        x.onerror = function(e) {
+          console.log('rfp get failed');
+        }        
+        x.send();        
+      },
+      properties: {
+      },
+      listeners: {
+      }
+    });
+  </script>
+
+</dom-module>

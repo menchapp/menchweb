@@ -10,7 +10,10 @@
       .horizontal {
         @apply(--layout-horizontal);
         @apply(--layout-center);
-      }       
+      }   
+      .vertical {
+        @apply(--layout-vertical);
+      }             
       .page {
         height: 100%;
         text-align: center;
@@ -30,7 +33,8 @@
         cursor: pointer;
       }
       #addNew /deep/ paper-card {
-        border: 5px solid antiquewhite;
+        border: 2px dashed lightgrey;
+        margin: 22px;
       }
       #addNew /deep/ img {
         opacity: 0.5;
@@ -54,7 +58,7 @@
       }
       .moreDetail paper-input {
         display: inline-block;
-        width: 42%;
+        width: 46%;
       }
       input[type="file"] {
         margin: 15px 0px;
@@ -72,16 +76,17 @@
         font-size: 14px;
         text-transform: uppercase;
       }
+      h2 {
+        color: #7B9595;
+      }
       #imgUpload {
-        margin: 20px;
         padding: 20px;
         color: #7B9595;
-        border: 1px solid #7B9595;
+        /*border: 1px solid #7B9595;*/
       }
       #imgUpload img {
         max-width: 300px;
         max-height: 200px;
-        
       }
       #button-container {
         text-align: center;
@@ -91,22 +96,33 @@
         margin: 10px 10px 0 10px;
         font-size: 14px;
       }       
+      iron-icon {
+        cursor: pointer;
+      }
     </style>  
 
 
     <div class="page">
-      <mench-rfp id="addNew" data="{{addNewCard}}"></mench-rfp>
+      <mench-rfp id="addNew" data="{{addNewCard}}" elevation="0"></mench-rfp>
       <template is="dom-repeat" items="{{rfps}}">
           <mench-rfp data="{{item}}"></mench-rfp>
       </template>
-      <paper-dialog id="addNewDialog" class="size-position">
-        <div id='dialogContents'>
+      <paper-dialog id="addNewDialog" class="size-position" modal>        
+        <div class="vertical fit" id='dialogContents'>
+          <div style="text-align: right;">
+            <iron-icon id="close" icon="clear"></iron-icon>
+          </div>
           <div hidden$="{{showImageUpload}}">
-            <paper-input label="Title" value="{{data.title}}"></paper-input>
+            <paper-input label="Title" id="title" required value="{{data.title}}"
+              error-message="Required"></paper-input>
             <paper-input label="Subtitle" value="{{data.subtitle}}"></paper-input>
             <div class='moreDetail'>   
-                <paper-input label="Prize $" value="{{data.prize}}"></paper-input>
-                <paper-input label="Contest End Date" placeholder="yyyy-mm-dd" value="{{data.endDate}}"></paper-input>
+                <paper-input id="prize" required label="Prize $" value="{{data.prize}}"
+                  error-message="Required"></paper-input>
+                <paper-input label="Contest End Date" id="date"  
+                  required placeholder="yyyy-mm-dd" value="{{data.endDate}}" 
+                  pattern="[0-9]{4}-(0?[1-9]|1[0-2])-(0?[1-9]|[1-2][0-9]|3[0-1])"
+                  error-message="Date with yyyy-mm-dd format required"></paper-input>
                 <paper-input label="Hashtag" value="{{data.hashtag}}"></paper-input>
                 <paper-input label="Terms" placeholder="rf / rm" value="{{data.terms}}"></paper-input>
                 <paper-input label="Duration" value="{{data.duration}}"></paper-input>
@@ -115,23 +131,23 @@
                 <paper-input label="Exclusivity" value="{{data.exclusivity}}"></paper-input>
             </div>
             <div><paper-textarea label="Details" rows="3" value="{{data.details}}"></paper-textarea></div>
-            <div id='button-container'><paper-button id='next'>Save & Continue</paper-button></div>
+            <div id='button-container'><paper-button id='next'>Add</paper-button></div>
+          </div>
+
+          <div hidden$="{{!showImageUpload}}">
+            <h2 style="margin: 20px">Successfully added!</h2>
+            <div id="imgUpload" class="flex">
+              If you'd like, choose a reference image to help guide photographers (Optional)<br>
+              <img src="{{editingRfpUrl}}">
+              <form action="{{rfpUploadUrl}}" method="POST" enctype="multipart/form-data">
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{csrfToken}}"/>
+              <input type="file" name="file"><br>
+              <input type="submit" name="submit" value="Upload">
+              </form>
+            </div>
+            <div id='button-container'><paper-button id='save'>Done</paper-button></div>  
           </div>
         </div>
-
-        <div hidden$="{{!showImageUpload}}">
-          <div id="imgUpload" class="flex self-stretch">
-            Choose a reference image to help guide photographers! (Optional)<br>
-            <img src="{{editingRfpUrl}}">
-            <form action="{{rfpUploadUrl}}" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{csrfToken}}"/>
-            <input type="file" name="file"><br>
-            <input type="submit" name="submit" value="Upload">
-            </form>
-          </div>
-          <div id='button-container'><paper-button id='save'>Done</paper-button></div>  
-        </div>
-
       </paper-dialog>    
     </div>
 
@@ -146,7 +162,7 @@
         this.showImageUpload = false;
         this.addNewCard = {
           userId: 'userName',
-          title: "Add a Menchquest",
+          title: "Add a Proposal",
           subtitle: "",
           prize: "",
           endDate: "dates that work for you",
@@ -178,13 +194,13 @@
         };
 
         this.rfpUploadUrl = rfpUploadUrl;
-        this.editingRfpUrl = editingRfpUrl;
-        if (editingRfpUrl) {
-          setTimeout(function () {
-            this.openAddNewDialog();
-            this.showImageUpload = true;
-          }.bind(this), 1000);
-        }
+        //this.editingRfpUrl = editingRfpUrl;
+        // if (editingRfpUrl) {
+        //   setTimeout(function () {
+        //     this.openAddNewDialog();
+        //     this.showImageUpload = true;
+        //   }.bind(this), 1000);
+        // }
         var x = new XMLHttpRequest();
         x.open('GET', 'get-my-rfp.html');
         x.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
@@ -201,6 +217,12 @@
         x.send();
       },
       saveNewRfp: function() {
+        if (!this.$.title.validate() ||
+            !this.$.prize.validate() ||
+            !this.$.date.validate()) {
+          return;
+        }
+
         var x = new XMLHttpRequest();
         x.open('POST', 'add-rfp.html');
         x.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
@@ -250,7 +272,14 @@
       },
       closeAddNewDialog: function() {
         this.$.addNewDialog.close();
+        if (this.showImageUpload) {
+          window.location.reload();
+        }
       },      
+      closeAddNewDialogAndRefresh: function() {
+        this.$.addNewDialog.close();
+        window.location.reload();
+      },            
       next: function() {
         this.showImageUpload = true;
       },
@@ -265,8 +294,9 @@
       },
       listeners: {
         'addNew.tap': 'openAddNewDialog',
-        'save.tap': 'closeAddNewDialog',
+        'save.tap': 'closeAddNewDialogAndRefresh',
         'next.tap': 'saveNewRfp',
+        'close.tap': 'closeAddNewDialog',
       }
     });
   </script>

@@ -22,6 +22,11 @@ class Submission(ndb.Model):
   # blob_key = blobstore.BlobReferenceProperty()
   blob_key = ndb.BlobKeyProperty()
 
+  def to_dict(self):
+    result = super(Submission, self).to_dict()
+    result['id'] = self.key.id()
+    return result
+
 class Profile(ndb.Model):
   user = ndb.StringProperty()
   brand = ndb.StringProperty()

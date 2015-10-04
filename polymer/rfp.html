@@ -59,7 +59,7 @@
       }
     </style>  
 
-    <paper-card class='fancy'>
+    <paper-card class='fancy' elevation='{{elevation}}'>
       <div class="card-content horizontal">
         <div class="avatar">
           $<span>{{data.prize}}</span>
@@ -102,6 +102,11 @@
         }
       },
       properties: {
+        elevation: {
+          type: Number,
+          notify: true,
+          value: 1
+        },
         data: {
           type: Object,
           notify: true,

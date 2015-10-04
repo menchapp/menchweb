@@ -93,10 +93,10 @@
           <img id='title-bar-logo' src="/icons/logo_grey.png">
         </div>
         <div>
-          <a href="/browse-projects.html">Browse Projects</a>
+          <a href="/browse-projects.html">Browse Proposals</a>
         </div>
         <div>
-          <a href="/my-projects.html">My Projects</a>
+          <a href="#" id="myProjectsLink">My Proposals</a>
         </div>
         <div id="userActions" hidden$="{{!loggedIn}}">
           <span>{{userName}}</span>
@@ -135,7 +135,14 @@
       },
       openLoginMessage: function() {
         this.$.pleaseLogin.open();
-      },      
+      },     
+      myProjectsClicked: function() {
+        if (this.loggedIn) {
+          window.location.href = "/my-projects.html";
+        } else {
+          this.openLoginMessage();
+        }
+      },
       properties: {
         // declare properties for the element's public API
         greeting: {
@@ -149,7 +156,8 @@
       },
       listeners: {
         'userActions.tap' : 'toggleUserActions',
-        'pleaseLogin' : 'openLoginMessage'
+        'pleaseLogin' : 'openLoginMessage',
+        'myProjectsLink.tap': 'myProjectsClicked'
       }, 
     });
   </script>

@@ -20,6 +20,7 @@ from djangoappengine import storage
 
 # TODOS
 # - dont get user_id until we're sure user is defined
+# - update profile instead of creating new entry
 
 def home(request):
   return http.HttpResponse('Hello World!')
@@ -247,6 +248,10 @@ def save_profile(request):
   print request.body
   data = json.loads(request.body)
 
+  profile = Profile.query(Profile.user == user.user_id())
+  if profile.count() > 0:
+    profile.fetch()[0].key.delete()
+
   profile = Profile(brand="",
                  user=user.user_id(),
                  name=data['name'],
@@ -357,12 +362,13 @@ def submission_photo_upload_handler(request, rfp_key):
   submission_query = Submission.query(Submission.user == user_id)
   if submission_query.count() > 0:
     submission = submission_query.fetch()
-    submission[0].key.delete()
-
-  submission = Submission(user=user_id,
+    submission[0].blob_key = image_key
+    submission[0].put()
+  else:
+    submission = Submission(user=user_id,
                           rfp_key=rfp_key,
                           blob_key=image_key)
-  submission.put()
+    submission.put()
   return HttpResponseRedirect('/rfp/%s?key=%s&sid=%d' % (rfp_key, str(image_key), submission.key.id()))
 
 def rfp_photo_upload_handler(request, rfp_key):

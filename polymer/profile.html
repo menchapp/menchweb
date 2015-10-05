@@ -1,0 +1,124 @@
+<link rel="import" href="../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../bower_components/iron-icons/communication-icons.html">
+
+<dom-module id="mench-profile">
+ <template>
+    <style is="custom-style">
+      .page {
+        height: 100%;
+        text-align: center;
+      }
+
+      .flex {
+        @apply(--layout-flex);
+      }
+      .horizontal {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }       
+      paper-card {
+        vertical-align: top;
+        width: 80%;
+        max-width: 600px;
+        margin: 20px;
+        text-align: left;
+        font-family: 'Khula', sans-serif;
+      }
+      h2 {
+        margin-left: 20px;
+      }
+      #cardContents {
+        padding: 20px;
+      }      
+      paper-input, paper-textarea {
+        --paper-input-container-color: #7B9595;
+        --paper-input-container-focus-color: #94DBFF;
+        margin: 0px 10px;
+      }
+      span {
+        max-width: 200px;
+      }
+      #imgUpload {
+        margin: 20px;
+        color: #7B9595;
+      }
+      #imgUpload img {
+        max-width: 300px;
+        max-height: 200px;
+      }
+      #button-container {
+        text-align: center;
+      }
+      #about {
+        padding: 0px 20px 20px 20px;
+      }
+      #details {
+        padding: 20px;
+      }
+      iron-icon, img {
+        padding-right: 20px;
+      }
+      #details div {
+        padding-bottom: 20px;
+      }
+      #details span {
+        color: darkgrey;
+      }
+    </style>  
+
+    <div class='page'>
+      <paper-card class='fancy'>
+        <div id='cardContents'>
+          <h2>{{name}}</h2>
+          <div class='horizontal'>
+            <div id="imgUpload" class="self-stretch">
+              <img src="{{profileUrl}}">
+            </div>          
+            <div id="details" class="flex">
+              <div>
+                <iron-icon icon="mail"></iron-icon>
+                <span>{{email}}</span>
+              </div>
+<!--               <div>
+                <iron-icon icon="communication:phone"></iron-icon>
+                <span>{{phone}}</span>
+              </div> -->
+              <div>
+                <iron-icon icon="maps:place"></iron-icon>
+                <span>{{location}}</span>
+              </div>     
+              <div>
+                <img style="width: 22px; padding-top: 4px" src="/icons/ig.png" />
+                <span>{{instagram}}</span>
+              </div>                                          
+              <div><span>{{website}}</span></div>
+            </div>
+          </div>
+          <div id="about">{{about}}</div>
+        </div>
+      </paper-card>    
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: "mench-profile",
+      ready: function() {
+        this.csrfToken = Cookies.get('csrftoken');
+        this.profileUrl = profileUrl;
+        this.description = "";
+        if (profileInfo) {
+          this.name = profileInfo.name;
+          this.email = profileInfo.email;
+          this.phone = profileInfo.phone;
+          this.location = profileInfo.location;
+          this.instagram = profileInfo.instagram;
+          this.website = profileInfo.website;
+          this.about = profileInfo.about || "";
+        }
+        console.log('ready');
+      }
+    });
+  </script>
+
+</dom-module>

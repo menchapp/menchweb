@@ -59,16 +59,23 @@
         max-height: 200px;
         
       }
-      #button-container {
+      #button-container, a {
         text-align: center;
+        color: #7B9595;
+        font-size: 14px;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline; 
       }
       paper-button {
-        color: #7B9595;
         margin: 10px 10px 0 10px;
-        font-size: 14px;
       }  
     </style>  
 
+    <paper-dialog id="successDialog" with-backdrop>
+      <h2>Saved!</h2>
+    </paper-dialog>
     <div class='page'>
       <paper-card class='fancy'>
         <div id='cardContents'>
@@ -93,7 +100,9 @@
           </div>
           <div><paper-textarea label="About you" rows="3" value="{{about}}"></paper-textarea></div>
           <div id='button-container'><paper-button id='save'>Save</paper-button></div>
+          <div style="text-align: center; margin-top: 20px"><a href='{{publicProfileUrl}}'>View my profile</a></div>
         </div>
+
       </paper-card>    
     </div>
   </template>
@@ -114,6 +123,11 @@
           this.instagram = profileInfo.instagram;
           this.website = profileInfo.website;
           this.about = profileInfo.about || "";
+          if (profileInfo.user) {
+            this.publicProfileUrl = "/profile/" + profileInfo.user;
+          } else {
+            this.publicProfileUrl = "#";
+          }
         }
         console.log('ready');
       },
@@ -121,6 +135,9 @@
         var x = new XMLHttpRequest();
         x.open('POST', '/save-user-profile.html');
         x.setRequestHeader("X-CSRFToken", this.csrfToken);
+        x.onload = function() {
+          this.$.successDialog.open();
+        }.bind(this);
         x.send(JSON.stringify({
           name: this.name,
           email: this.email,

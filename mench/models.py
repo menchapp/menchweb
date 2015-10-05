@@ -10,11 +10,15 @@ class UserPhoto(ndb.Model):
   # blob_key = blobstore.BlobReferenceProperty()
   blob_key = ndb.BlobKeyProperty()
 
-# Create your models here.
 class RfpPhoto(ndb.Model):
   rfp_key = ndb.StringProperty()
   # blob_key = blobstore.BlobReferenceProperty()
   blob_key = ndb.BlobKeyProperty()
+
+class Purchase(ndb.Model):
+  rfp_id = ndb.StringProperty()
+  submission_id = ndb.StringProperty()
+  user_id = ndb.StringProperty()
 
 class Submission(ndb.Model):
   rfp_key = ndb.StringProperty()
@@ -35,6 +39,7 @@ class Profile(ndb.Model):
   phone = ndb.StringProperty()
   instagram = ndb.StringProperty()
   location = ndb.StringProperty()
+  website = ndb.StringProperty()
   about = ndb.TextProperty()  
 
 class Rfp(ndb.Model):

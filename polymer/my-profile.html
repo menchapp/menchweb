@@ -1,4 +1,4 @@
-<dom-module id="mench-profile">
+<dom-module id="mench-my-profile">
  <template>
     <style is="custom-style">
       .page {
@@ -91,7 +91,7 @@
               <paper-input label="Website" value="{{website}}"></paper-input>
             </div>
           </div>
-          <div><paper-textarea label="About you" rows="3" value="{{description}}"></paper-textarea></div>
+          <div><paper-textarea label="About you" rows="3" value="{{about}}"></paper-textarea></div>
           <div id='button-container'><paper-button id='save'>Save</paper-button></div>
         </div>
       </paper-card>    
@@ -100,7 +100,7 @@
 
   <script>
     Polymer({
-      is: "mench-profile",
+      is: "mench-my-profile",
       ready: function() {
         this.profileUploadUrl = profileUploadUrl;
         this.csrfToken = Cookies.get('csrftoken');
@@ -113,7 +113,7 @@
           this.location = profileInfo.location;
           this.instagram = profileInfo.instagram;
           this.website = profileInfo.website;
-          this.description = profileInfo.description || "";
+          this.about = profileInfo.about || "";
         }
         console.log('ready');
       },
@@ -128,7 +128,7 @@
           location: this.location,
           instagram: this.instagram,
           website: this.website,
-          description: this.description
+          about: this.about
         }));
       },
       properties: {

@@ -39,9 +39,19 @@
         max-width: 200px;
       }
       input[type="file"] {
-        margin: 15px 0px;
+        background-image: url("/icons/add_new.jpg");
+        width: 200px;
+        height: 200px;
+        border: 2px dashed darkgrey;
+        background-position: center;
       }
-      .file::-webkit-file-upload-button, input[type="submit"] {
+      .file::-webkit-file-upload-button {
+        display: none;
+      } 
+      #file {
+        cursor: pointer;
+      }
+      input[type="submit"], button {
         border: none;
         background-color: lightsteelblue;
         font-family: 'Khula';
@@ -56,9 +66,9 @@
         margin: 20px 0px;
       }
       #imgUpload img, #submissions img {
-        max-width: 300px;
-        max-height: 200px;
-        
+        max-width: 100%;
+        display: block;
+        margin: 20px 0px;
       }
       #button-container {
         text-align: center;
@@ -74,9 +84,21 @@
       #highlightedInfo span {
         font-size: 20px
       }
+      #highlightedInfo {
+        text-align: center;
+        padding: 20px 20px 0px 20px !important;
+        margin-bottom: 20px;
+        background-color: rgb(244,244,244);
+      }
       .border {
-        border-bottom: 1px solid lightgrey;
         margin-bottom: 15px;
+      }
+      iron-icon {
+        cursor: pointer;
+        fill: darkgrey;
+      }
+      iron-icon[icon="favorite-border"], iron-icon[icon="favorite"] {
+        fill: lightpink;
       }
       span {
         color: darkslateblue;
@@ -90,7 +112,23 @@
       a:hover {
         color: #333;
       }
+      paper-dialog {
+        max-width: 400px;
+      }
     </style>  
+    <paper-dialog id="confirmDialog" modal>
+      <h2>Confirm Purchase</h2>
+      <p>Are you sure you'd like purchase this photo? By clicking 'Yes' you agree to let Mench contact the photographer on your behalf.</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm on-click='confirm'>Yes</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-dialog id="successDialog" with-backdrop>
+      <h2>Purchase Confirmed!</h2>
+      <p>You will receive an email from Mench with your order details.</p>
+    </paper-dialog>
+
 
     <div class='page'>
       <paper-card class='fancy'>
@@ -101,7 +139,7 @@
               <div class='border'>
                 Requested by <span style="font-size: 16px; line-height: 16px;">{{data.userName}}</span>
               </div>
-              <div  id="highlightedInfo" class='horizontal' style="padding-bottom: 0px">
+              <div  id="highlightedInfo" class='horizontal'>
                 <div class='flex'>Prize <span>$<a>{{data.prize}}</a></span></div>
                 <div class='flex'>Contest ends on <span>{{data.endDate}}</span></div>
                 <div class='flex'>Terms <span>{{data.terms}}</span></div>
@@ -114,22 +152,36 @@
               <div>Hashtag <span>{{data.hashtag}}</span></div>
             </div>
             <div id="submissions" class="flex self-stretch" hidden$="{{!mine}}">
-              <h3>Submissions</h3>
+              <h2>Submissions</h2>
               <div hidden$="{{haveSubmissions}}">No submissions yet. They must be on their way!</div>
               <template is="dom-repeat" items="{{submissions}}">
-                <img src="{{item}}">
+                <div style="
+                    text-align: center;
+                    padding-bottom: 20px;
+                    margin: 20px 0px;
+                    background-color: rgb(240,240,240);
+                ">
+                  <img src="{{item.url}}">
+                  <iron-icon icon="favorite-border" on-click='like' hidden$='{{item.liked}}'></iron-icon>
+                  <iron-icon icon="favorite" on-click='like' hidden$='{{!item.liked}}'></iron-icon>
+                  <iron-icon on-click="openProfile" icon="account-circle"></iron-icon>
+                  <iron-icon on-click='purchase' icon="credit-card"></iron-icon>
+                </div>
               </template>
             </div>
             <div id="imgUpload" class="flex self-stretch" hidden$="{{mine}}">
-              <h3>Submit a Photo</h3>
+              <h2>Submit a Photo</h2>
               <img src="{{submissionImgUrl}}">
-              <form action="{{submissionImgUploadUrl}}" method="POST" enctype="multipart/form-data">
-              <input type="hidden" name="csrfmiddlewaretoken" value="{{csrfToken}}"/>
-              <input type="file" name="file" class='file'><br>
-              <input type="submit" name="submit" value="Upload">
+              <form action="{{submissionImgUploadUrl}}" hidden$='{{hasUserUpload}}' method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{csrfToken}}"/>
+                <input type="file" id="file" name="file" class='file' on-click='clear' on-change='setFilename'><br>
+                <span>{{fileName}}</span>
+                <input hidden$='{{!fileSelected}}' type="submit" name="submit" value="Upload">
               </form>
+              <button hidden$='{{!submissionImgUrl}}' on-click='deleteSubmission'>Delete</button>
             </div>
             <a href="{{backUrl}}">Back</a>
+            <!-- <button on-click='clear'>hi</button> -->
           </div>
       </paper-card>    
     </div>
@@ -138,23 +190,82 @@
   <script>
     Polymer({
       is: "mench-detailed-rfp",
+      clear: function () {
+        this.$.file.value = null;
+      },
+      like: function(e) {
+        var model = e.model;
+        model.set('item.liked', !model.item.liked);
+      },
+      openProfile: function(e) {
+        var model = e.model;
+        window.open('/profile/' + model.item.user, '_blank')
+      },
+      confirm: function() {
+        console.log(this.submissionSelectedForPurchase);
+        var x = new XMLHttpRequest();
+        x.open('POST', '/purchase');
+        x.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+        x.onload = function(e) {
+          console.log('Successfully purchased submission');
+          this.$.successDialog.open();
+        }.bind(this);
+        x.onerror = function(e) {
+          console.log('Submission purchase failed');
+        }        
+        x.send(JSON.stringify(this.submissionSelectedForPurchase));
+      },
+      purchase: function(e) {
+        var model = e.model;
+        this.submissionSelectedForPurchase = {
+          rfp: this.data.id,
+          submission: model.item.id,
+          user: model.item.user,
+        };
+        this.$.confirmDialog.open();
+      },      
+      setFilename: function() {
+        this.fileName = this.$.file.value.split(/(\\|\/)/g).pop();
+        if (this.fileName.length > 0) {
+          this.fileSelected = true;
+        }
+        console.log(this.$.file.value);
+      },      
+      deleteSubmission: function() {
+        var x = new XMLHttpRequest();
+        x.open('POST', '/delete-submission/' + submissionId);
+        x.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+        x.onload = function(e) {
+          console.log('Successfully deleted submission');
+          window.location.href = '/rfp/' + this.data.id;
+        }.bind(this);
+        x.onerror = function(e) {
+          console.log('Submission delete failed');
+        }        
+        x.send();        
+      },
       ready: function() {
+        this.submissionSelectedForPurchase;
+        this.fileSelected = false;
+        this.fileName = "";
         this.mine = mine;
         this.haveSubmissions = false;
+        this.csrfToken = Cookies.get('csrftoken');
+        this.submissionImgUrl = submissionImgUrl;
+        this.hasUserUpload = this.submissionImgUrl != "";
+        this.submissionImgUploadUrl = submissionImgUploadUrl;
+
         if (this.mine) {
           this.backUrl = '/my-projects.html';
         } else {
           this.backUrl = '/browse-projects.html';
         }
-        this.submissionImgUrl = submissionImgUrl;
-        this.submissionImgUploadUrl = submissionImgUploadUrl;
-        this.csrfToken = Cookies.get('csrftoken');
+        
         this.data = rfpInfo;
 
         if (!this.data.terms) {
           this.data.terms = '---';
         }
-
 
         var x = new XMLHttpRequest();
         this.submissions = [];

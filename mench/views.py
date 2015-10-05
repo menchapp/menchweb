@@ -18,6 +18,9 @@ from google.appengine.ext.webapp import blobstore_handlers
 
 from djangoappengine import storage
 
+# TODOS
+# - dont get user_id until we're sure user is defined
+
 def home(request):
   return http.HttpResponse('Hello World!')
 
@@ -103,17 +106,6 @@ def rfp(request, rfp_key):
   print rfp_key
 
   if user:
-    submission_query = Submission.query(Submission.user == user.user_id())
-    submission_img_url = ""
-    if submission_query.count() > 0:
-      submissions = submission_query.fetch()
-      for s in submissions:
-        s_dict = s.to_dict()
-        if s_dict['rfp_key'] == rfp_key:
-          submission_img_url = images.get_serving_url(s_dict['blob_key'])
-    elif request.GET.__contains__("key"):  
-      submission_img_url = images.get_serving_url(request.GET.__getitem__("key"))
-
     rfp = Rfp.get_by_id(int(rfp_key))
     mine = False
     if rfp:
@@ -122,6 +114,24 @@ def rfp(request, rfp_key):
         mine = True
     else:
       rfp_info = None
+
+    submission_img_url = ""
+    submission_id = ""
+
+    if not mine: # if this RFP was not created by the current user.
+      submission_query = Submission.query(Submission.user == user.user_id())
+      if submission_query.count() > 0:
+        submissions = submission_query.fetch()
+        for s in submissions:
+          s_dict = s.to_dict()
+          if s_dict['rfp_key'] == rfp_key:
+            submission_img_url = images.get_serving_url(s_dict['blob_key'])
+            submission_id = s_dict['id']
+      if request.GET.__contains__("key"):  
+        submission_img_url = images.get_serving_url(request.GET.__getitem__("key"))
+      if request.GET.__contains__("sid"):  
+        submission_id = request.GET.__getitem__("sid")
+
     context = Context({
       'user_name': user.nickname(),
       'login_url': "",
@@ -129,6 +139,7 @@ def rfp(request, rfp_key):
       'logged_in': True,
       'rfp_info': rfp_info,
       'mine' : mine,
+      'submission_id' : submission_id,
       'submission_img_url' : submission_img_url,
       'submission_img_upload_url': blobstore.create_upload_url('/upload-rfp-submission/%s' % rfp_key)
     }, autoescape=False)
@@ -168,6 +179,19 @@ def add_rfp(request):
 # Submissions
 #########################################################
 
+def delete_submission(request, id):
+  if users.get_current_user():
+    user_id = users.get_current_user().user_id()
+  else:
+    return HttpResponse(content='Login required', content_type=None, status=401)
+
+  if request.method == 'POST':
+    submission = Submission.get_by_id(int(id))
+    if submission and submission.to_dict()['user'] == user_id:
+      submission.key.delete()
+      return HttpResponse('Success')
+  return HttpResponse(content='Request failed', content_type=None, status=401)
+
 def get_submissions(request, rfp_key):
   user = users.get_current_user()
   if user:
@@ -180,9 +204,35 @@ def get_submissions(request, rfp_key):
     submission_query = Submission.query(Submission.rfp_key == rfp_key)
     if submission_query.count() > 0:
       submissions = submission_query.fetch()
-      submission_img_urls = [images.get_serving_url(s.to_dict()['blob_key']) for s in submissions]
+      submission_img_urls = []
+      for s in submissions:
+        submission_img_urls.append({
+          'url': images.get_serving_url(s.to_dict()['blob_key']),
+          'user': s.to_dict()['user'],
+          'id': s.to_dict()['id'],
+          'liked': False
+        })
     return HttpResponse(json.dumps({'submissions': submission_img_urls}), content_type="application/json")
   return HttpResponse(json.dumps({'submissions': None}), content_type="application/json")
+
+#########################################################
+# Purchase
+#########################################################
+
+def purchase(request):
+  user = users.get_current_user()
+  if user == None:
+    return HttpResponse("User not logged in.")  
+  if request.method != 'POST':
+    return HttpResponse("Purchase only accepts POSTs")  
+
+  data = json.loads(request.body)
+  purchase = Purchase(rfp_id=str(data['rfp']),
+                 submission_id=str(data['submission']),
+                 user_id=str(data['user']))
+
+  purchase.put()
+  return HttpResponse("Success!")  
 
 #########################################################
 # User profiles
@@ -204,10 +254,40 @@ def save_profile(request):
                  phone=data['phone'],
                  instagram=data['instagram'],
                  location=data['location'],
-                 about=data['description'])
+                 website=data['website'],
+                 about=data['about'])
 
   profile.put()
   return HttpResponse("Success!")  
+
+def profile(request, user_id):
+  user = users.get_current_user()
+  if user == None:
+    return HttpResponse("User not logged in.")  
+
+  profile_query = Profile.query(Profile.user == user_id)
+  if profile_query.count() > 0:
+    profile = profile_query.fetch()  
+    profile_info = json.dumps(profile[0].to_dict())
+  else:
+    profile_info = None
+  img_query = UserPhoto.query(UserPhoto.user == user_id)
+  if img_query.count() > 0:
+    img = img_query.fetch()  
+    img_url = images.get_serving_url(img[0].to_dict()['blob_key'])
+  else:
+    img_url = None
+
+  context = Context({
+    'user_name': user.nickname(),
+    'login_url': "",
+    'logout_url': users.create_logout_url('/'),
+    'logged_in': True,
+    'profile_url' : img_url,
+    'profile_info': profile_info
+  }, autoescape=False)
+  template = loader.get_template('profile.html')
+  return HttpResponse(template.render(context))  
 
 @ensure_csrf_cookie
 def my_profile(request):
@@ -283,7 +363,7 @@ def submission_photo_upload_handler(request, rfp_key):
                           rfp_key=rfp_key,
                           blob_key=image_key)
   submission.put()
-  return HttpResponseRedirect('/rfp/%s?key=%s' % (rfp_key, str(image_key)))
+  return HttpResponseRedirect('/rfp/%s?key=%s&sid=%d' % (rfp_key, str(image_key), submission.key.id()))
 
 def rfp_photo_upload_handler(request, rfp_key):
   image = request.FILES['file']

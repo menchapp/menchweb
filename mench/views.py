@@ -228,6 +228,11 @@ def purchase(request):
     return HttpResponse("Purchase only accepts POSTs")  
 
   data = json.loads(request.body)
+  rfp = Rfp.get_by_id(data['rfp'])
+  if rfp:
+    if rfp.to_dict()['user'] != user.user_id():
+      return HttpResponse("Can only purchase photos for RFPs you created", content_type=None, status=401)
+
   purchase = Purchase(rfp_id=str(data['rfp']),
                  submission_id=str(data['submission']),
                  user_id=str(data['user']))

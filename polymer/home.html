@@ -1,0 +1,132 @@
+<link rel="import" href="../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../bower_components/iron-icons/communication-icons.html">
+
+<dom-module id="mench-home">
+ <template>
+    <style is="custom-style">
+      .page {
+        text-align: center;
+      }
+
+      .flex {
+        @apply(--layout-flex);
+      }
+      .horizontal {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }       
+      paper-dialog{
+        color: darkgrey;
+        font-family: Khula;
+        border-radius: 2px;
+        text-align: center;
+      }
+      paper-card {
+        vertical-align: top;
+        width: 80%;
+        max-width: 700px;
+        margin: 20px;
+        text-align: left;
+        font-family: 'Khula', sans-serif;
+      }
+      h1 {
+        padding-top: 0px;
+      }
+      #cardContents {
+        padding: 20px;
+      }      
+      .page {
+        color: darkgrey;
+        background-image: url("/icons/bg.jpg");
+        background-size: cover;
+        height: 100%;
+      }
+      paper-button {
+        border: none;
+        background-color: lightsteelblue;
+        font-family: 'Khula';
+        color: white;
+        padding: 8px 12px 5px;
+        border-radius: 7%;
+        cursor: pointer;
+        font-size: 14px;
+        text-transform: uppercase;
+      } 
+      .inner {
+        margin: 50px;
+      }
+      p {
+        max-width: 300px;
+        margin: 20px auto;
+      }
+    </style>  
+
+    <paper-dialog with-backdrop id='loggedInDialog'>
+      <div class='inner'>
+        <h1>It's so great to see you!</h1>
+        <p>Are you a photographer? Find brands who need talent just like you!</p>
+        <paper-button id='browseProposals'>
+          Browse Proposals
+        </paper-button>
+        <p>Are you a buyer? Post your proposals for our community of photographers!</p>
+        <paper-button id='myProposals'>
+          My Proposals
+        </paper-button>
+      </div> 
+    </paper-dialog>
+    <paper-dialog with-backdrop id='loggedOutDialog'>
+      <div class='inner'>
+        <h1>Welcome to Mench</h1>
+        <p>Login to get started as a photographer or buyer in our creative community!</p>
+        <paper-button id='login'>
+          Login
+        </paper-button>
+      </div> 
+    </paper-dialog>
+    <div class='page'>
+<!--       <div class='inner'>
+        <h1>Welcome to Mench</h1>
+      </div> -->
+      <!-- <paper-card class='fancy'>
+        <div id='cardContents'>
+          
+        </div>
+      </paper-card>     -->
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: "mench-home",
+      ready: function() {
+        this.userName = userName;
+        this.csrfToken = Cookies.get('csrftoken');
+        if (loggedIn) {
+          setTimeout(function(){
+            this.$.loggedInDialog.open();
+          }.bind(this), 500);
+        } else {
+          setTimeout(function(){
+            this.$.loggedOutDialog.open();
+          }.bind(this), 500);          
+          
+        }
+      },
+      loginRedirect: function() {
+        window.location.href = loginUrl;
+      },
+      browseProposalsRedirect: function() {
+        window.location.href = '/browse-projects.html';
+      },
+      myProposalsRedirect: function() {
+        window.location.href = '/my-projects.html';
+      },            
+      listeners: {
+        'login.tap' :'loginRedirect',
+        'browseProposals.tap' :'browseProposalsRedirect',
+        'myProposals.tap' :'myProposalsRedirect'
+      }
+    });
+  </script>
+
+</dom-module>

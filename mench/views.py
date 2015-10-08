@@ -390,6 +390,26 @@ def rfp_photo_upload_handler(request, rfp_key):
 #########################################################
 
 @ensure_csrf_cookie
+def home(request):
+  user = users.get_current_user()
+  if user:
+    context = Context({
+      'user_name': user.nickname(),
+      'login_url': "",
+      'logout_url': users.create_logout_url('/'),
+      'logged_in': True
+    }, autoescape=False)
+  else:
+    context = Context({
+      'user_name': "",
+      'login_url': users.create_login_url('/'),
+      'logout_url': "",
+      'logged_in': False
+    }, autoescape=False)
+  template = loader.get_template('home.html')
+  return HttpResponse(template.render(context))  
+
+@ensure_csrf_cookie
 def browse_projects(request):
   user = users.get_current_user()
   if user:

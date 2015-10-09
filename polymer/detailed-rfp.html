@@ -65,8 +65,13 @@
       #imgUpload, #submissions {
         margin: 20px 0px;
       }
-      #imgUpload img, #submissions img {
+      #imgUpload img {
         max-width: 100%;
+        display: block;
+        margin: 20px 0px;
+      }
+      #submissions img {
+        width: 100%;
         display: block;
         margin: 20px 0px;
       }
@@ -137,7 +142,7 @@
               <h1>{{data.title}}</h1>
               <div style='font-size: 18px'>{{data.subtitle}}</div>
               <div class='border'>
-                Requested by <span style="font-size: 16px; line-height: 16px;">{{data.userName}}</span>
+                Requested by <span style="font-size: 16px; line-height: 16px;"><a href="{{userProfileUrl}}">{{data.userName}}</a></span>
               </div>
               <div  id="highlightedInfo" class='horizontal'>
                 <div class='flex'>Prize <span>$<a>{{data.prize}}</a></span></div>
@@ -266,6 +271,7 @@
         if (!this.data.terms) {
           this.data.terms = '---';
         }
+        this.userProfileUrl = "/profile/" + this.data.user;
 
         var x = new XMLHttpRequest();
         this.submissions = [];
